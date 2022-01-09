@@ -1,6 +1,7 @@
 package main
 
 import (
+	"DiscordWordle/internal/wordle/generated-code"
 	"context"
 	"github.com/bwmarrin/discordgo"
 	"log"
