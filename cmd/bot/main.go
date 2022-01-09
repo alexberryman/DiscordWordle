@@ -29,7 +29,7 @@ type response struct {
 
 var db *sql.DB
 
-const cmdGraph = "graph"
+const cmdHistory = "history"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 
@@ -133,7 +133,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	var r response
 
 	if strings.Contains(input, cmdWordle) {
-		var dataExp = regexp.MustCompile(`Wordle\s(?P<game_id>\d+)\s(?P<guesses>\d+)\/6`)
+		var dataExp = regexp.MustCompile(`Wordle\s(?P<game_id>\d+)\s(?P<guesses>\d+)/6`)
 		match := dataExp.FindStringSubmatch(input)
 		result := make(map[string]string)
 		for i, name := range dataExp.SubexpNames() {
@@ -149,7 +149,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {
-		helpResponse(s, m, botMentionToken, cmdGraph, cmdTimeZone)
+		helpResponse(s, m, botMentionToken, cmdHistory, cmdTimeZone)
 	} else {
 		r.Text = "Wut?"
 		flushEmojiAndResponseToDiscord(s, m, r)
