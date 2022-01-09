@@ -1,7 +1,7 @@
 package main
 
 import (
-	"DiscordGoTurnips/internal/turnips/generated-code"
+	"DiscordWordle/internal/turnips/generated-code"
 	"context"
 	"github.com/bwmarrin/discordgo"
 	"log"

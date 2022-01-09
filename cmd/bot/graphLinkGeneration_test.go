@@ -1,7 +1,7 @@
 package main
 
 import (
-	turnips "DiscordGoTurnips/internal/turnips/generated-code"
+	turnips "DiscordWordle/internal/turnips/generated-code"
 	"fmt"
 	"testing"
 	"time"

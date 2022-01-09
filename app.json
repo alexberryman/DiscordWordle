@@ -1,5 +1,5 @@
 {
-  "name": "DiscordGoTurnips",
+  "name": "DiscordWordle",
   "description": "Discord bot written in Go to track Turnip prices",
   "keywords": [
     "postgresql",
@@ -16,8 +16,8 @@
       "url": "heroku/go"
     }
   ],
-  "website": "https://github.com/alexberryman/DiscordGoTurnips",
-  "repository": "https://github.com/alexberryman/DiscordGoTurnips",
+  "website": "https://github.com/alexberryman/DiscordWordle",
+  "repository": "https://github.com/alexberryman/DiscordWordle",
   "env": {
     "DISCORD_TOKEN": {
       "description": "The Discord Build-A-Bot Token used by the bot to authenticate with Discord",

@@ -11,7 +11,7 @@ services:
   sqlc:
     image: "kjconroy/sqlc"
     volumes:
-    - /c/Users/alexb/go/src/DiscordGoTurnips/internal/turnips/:/src
+    - ./internal/turnips/:/src
     working_dir: /src
     command: generate
 volumes:

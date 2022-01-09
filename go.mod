@@ -1,4 +1,4 @@
-module DiscordGoTurnips
+module DiscordWordle
 
 go 1.14
 

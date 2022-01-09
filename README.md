@@ -1,6 +1,6 @@
-# DiscordGoTurnips
-[![Go Report Card](https://goreportcard.com/badge/github.com/alexberryman/DiscordGoTurnips)](https://goreportcard.com/report/github.com/alexberryman/DiscordGoTurnips)
-[![Actions Status](https://github.com/alexberryman/discordgoturnips/workflows/Go/badge.svg)](https://github.com/alexberryman/discordgoturnips/actions)
+# DiscordWordle
+[![Go Report Card](https://goreportcard.com/badge/github.com/alexberryman/DiscordWordle)](https://goreportcard.com/report/github.com/alexberryman/DiscordWordle)
+[![Actions Status](https://github.com/alexberryman/DiscordWordle/workflows/Go/badge.svg)](https://github.com/alexberryman/DiscordWordle/actions)
 
 A bot for discord to store and report turnip prices for the members of service.
 
