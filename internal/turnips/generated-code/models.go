@@ -3,28 +3,8 @@
 package turnips
 
 import (
-	"fmt"
 	"time"
 )
-
-type AmPm string
-
-const (
-	AmPmAm AmPm = "am"
-	AmPmPm AmPm = "pm"
-)
-
-func (e *AmPm) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = AmPm(s)
-	case string:
-		*e = AmPm(s)
-	default:
-		return fmt.Errorf("unsupported scan type for AmPm: %T", src)
-	}
-	return nil
-}
 
 type Account struct {
 	DiscordID string `json:"discord_id"`
@@ -37,14 +17,10 @@ type Nickname struct {
 	Nickname  string `json:"nickname"`
 }
 
-type TurnipPrice struct {
+type WordleScore struct {
 	ID        int64     `json:"id"`
 	DiscordID string    `json:"discord_id"`
-	Price     int32     `json:"price"`
-	AmPm      AmPm      `json:"am_pm"`
-	DayOfWeek int32     `json:"day_of_week"`
-	DayOfYear int32     `json:"day_of_year"`
-	Year      int32     `json:"year"`
+	GameID    int32     `json:"game_id"`
+	Guesses   int32     `json:"guesses"`
 	CreatedAt time.Time `json:"created_at"`
-	Week      int32     `json:"week"`
 }

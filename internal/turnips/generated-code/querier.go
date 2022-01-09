@@ -9,24 +9,21 @@ import (
 type Querier interface {
 	CountAccountsByDiscordId(ctx context.Context, discordID string) (int64, error)
 	CountNicknameByDiscordId(ctx context.Context, arg CountNicknameByDiscordIdParams) (int64, error)
-	CountPricesByDiscordId(ctx context.Context, discordID string) (int64, error)
+	CountScoresByDiscordId(ctx context.Context, discordID string) (int64, error)
 	CreateAccount(ctx context.Context, discordID string) (Account, error)
 	CreateNickname(ctx context.Context, arg CreateNicknameParams) (Nickname, error)
-	CreatePrice(ctx context.Context, arg CreatePriceParams) (TurnipPrice, error)
+	CreateScore(ctx context.Context, arg CreateScoreParams) (WordleScore, error)
 	DeleteAccount(ctx context.Context, discordID string) error
 	DeleteNickname(ctx context.Context, discordID string) error
-	DeletePricesForUser(ctx context.Context, discordID string) error
+	DeleteScoresForUser(ctx context.Context, discordID string) error
 	GetAccount(ctx context.Context, discordID string) (Account, error)
-	GetHistoricalWeekPriceHistoryByAccount(ctx context.Context, arg GetHistoricalWeekPriceHistoryByAccountParams) ([]GetHistoricalWeekPriceHistoryByAccountRow, error)
-	GetHistoricalWeekPriceHistoryByServer(ctx context.Context, arg GetHistoricalWeekPriceHistoryByServerParams) ([]GetHistoricalWeekPriceHistoryByServerRow, error)
 	GetNickname(ctx context.Context, arg GetNicknameParams) (Nickname, error)
-	GetWeeksPriceHistoryByAccount(ctx context.Context, arg GetWeeksPriceHistoryByAccountParams) ([]GetWeeksPriceHistoryByAccountRow, error)
-	GetWeeksPriceHistoryByServer(ctx context.Context, serverID string) ([]GetWeeksPriceHistoryByServerRow, error)
+	GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHistoryByAccountParams) ([]GetScoreHistoryByAccountRow, error)
 	ListAccounts(ctx context.Context) ([]Account, error)
 	ListNicknames(ctx context.Context) ([]Nickname, error)
-	ListPrices(ctx context.Context) ([]TurnipPrice, error)
+	ListScores(ctx context.Context) ([]WordleScore, error)
 	UpdateNickname(ctx context.Context, arg UpdateNicknameParams) (Nickname, error)
-	UpdatePrice(ctx context.Context, arg UpdatePriceParams) (TurnipPrice, error)
+	UpdateScore(ctx context.Context, arg UpdateScoreParams) (WordleScore, error)
 	UpdateTimeZone(ctx context.Context, arg UpdateTimeZoneParams) (Account, error)
 }
 
