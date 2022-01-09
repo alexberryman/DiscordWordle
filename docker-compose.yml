@@ -11,7 +11,7 @@ services:
   sqlc:
     image: "kjconroy/sqlc"
     volumes:
-    - ./internal/turnips/:/src
+    - ./internal/wordle/:/src
     working_dir: /src
     command: generate
 volumes:

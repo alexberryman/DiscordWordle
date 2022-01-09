@@ -1,11 +1,11 @@
 .PHONY: help status up down delete-db reset-db
 .DEFAULT_GOAL := help
 status: ## sql-migrate status
-	set -o allexport; source local.env; set +o allexport; cd internal/turnips; sql-migrate status
+	set -o allexport; source local.env; set +o allexport; cd internal/wordle; sql-migrate status
 up: ## sql-migrate up
-	set -o allexport; source local.env; set +o allexport; cd internal/turnips; sql-migrate up; sql-migrate status
+	set -o allexport; source local.env; set +o allexport; cd internal/wordle; sql-migrate up; sql-migrate status
 down: ## sql-migrate down
-	set -o allexport; source local.env; set +o allexport; cd internal/turnips; sql-migrate down; sql-migrate status
+	set -o allexport; source local.env; set +o allexport; cd internal/wordle; sql-migrate down; sql-migrate status
 delete-db: ## deletes docker volume for database and restarts container
 	docker-compose stop database
 	docker-compose rm -f database

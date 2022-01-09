@@ -1,11 +1,11 @@
 {
   "name": "DiscordWordle",
-  "description": "Discord bot written in Go to track Turnip prices",
+  "description": "Discord bot written in Go to track Wordle scores",
   "keywords": [
     "postgresql",
     "discord",
     "go",
-    "animal-crossing",
+    "wordle",
     "bot"
   ],
   "buildpacks": [

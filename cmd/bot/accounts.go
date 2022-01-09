@@ -1,7 +1,6 @@
 package main
 
 import (
-	"DiscordWordle/internal/turnips/generated-code"
 	"context"
 	"github.com/bwmarrin/discordgo"
 	"log"
@@ -9,7 +8,7 @@ import (
 	"time"
 )
 
-func updateAccountTimeZone(ctx context.Context, input string, CmdTimeZone string, s *discordgo.Session, m *discordgo.MessageCreate, q *turnips.Queries, a turnips.Account) {
+func updateAccountTimeZone(ctx context.Context, input string, CmdTimeZone string, s *discordgo.Session, m *discordgo.MessageCreate, q *wordle.Queries, a wordle.Account) {
 	var response response
 
 	timezoneInput := strings.TrimSpace(strings.Replace(input, CmdTimeZone, "", 1))
@@ -23,7 +22,7 @@ func updateAccountTimeZone(ctx context.Context, input string, CmdTimeZone string
 		response.Emoji = "✅"
 	}
 
-	_, _ = q.UpdateTimeZone(ctx, turnips.UpdateTimeZoneParams{
+	_, _ = q.UpdateTimeZone(ctx, wordle.UpdateTimeZoneParams{
 		DiscordID: a.DiscordID,
 		TimeZone:  timezoneInput,
 	})
@@ -31,9 +30,9 @@ func updateAccountTimeZone(ctx context.Context, input string, CmdTimeZone string
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func getOrCreateAccount(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, existingAccount int64, existingNickname int64, q *turnips.Queries) turnips.Account {
-	var account turnips.Account
-	var nickname turnips.Nickname
+func getOrCreateAccount(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, existingAccount int64, existingNickname int64, q *wordle.Queries) wordle.Account {
+	var account wordle.Account
+	var nickname wordle.Nickname
 	if existingAccount > 0 {
 		account, _ = q.GetAccount(ctx, m.Author.ID)
 		reactToMessage(s, m, "👤")
@@ -50,13 +49,13 @@ func getOrCreateAccount(ctx context.Context, s *discordgo.Session, m *discordgo.
 	}
 
 	if existingNickname > 0 {
-		nickname, _ = q.GetNickname(ctx, turnips.GetNicknameParams{
+		nickname, _ = q.GetNickname(ctx, wordle.GetNicknameParams{
 			DiscordID: m.Author.ID,
 			ServerID:  m.GuildID,
 		})
 		if nickname.Nickname != name {
 			var err error
-			nickname, err = q.UpdateNickname(ctx, turnips.UpdateNicknameParams{
+			nickname, err = q.UpdateNickname(ctx, wordle.UpdateNicknameParams{
 				DiscordID: m.Author.ID,
 				Nickname:  name,
 				ServerID:  m.GuildID,
@@ -69,7 +68,7 @@ func getOrCreateAccount(ctx context.Context, s *discordgo.Session, m *discordgo.
 		}
 
 	} else {
-		nickname, _ = q.CreateNickname(ctx, turnips.CreateNicknameParams{
+		nickname, _ = q.CreateNickname(ctx, wordle.CreateNicknameParams{
 			DiscordID: m.Author.ID,
 			ServerID:  m.GuildID,
 			Nickname:  name,

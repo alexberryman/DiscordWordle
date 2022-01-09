@@ -2,13 +2,12 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexberryman/DiscordWordle)](https://goreportcard.com/report/github.com/alexberryman/DiscordWordle)
 [![Actions Status](https://github.com/alexberryman/DiscordWordle/workflows/Go/badge.svg)](https://github.com/alexberryman/DiscordWordle/actions)
 
-A bot for discord to store and report turnip prices for the members of service.
+A bot for discord to store and track Wordle scores.
 
 ## Usage
-Mention the bot using `@BotName help` to see full list of commands:
-![usage image](docs/images/usage.png)
+Mention the bot using `@BotName help` to see full list of commands
 
-To add a price just mention the bot followed by the current price that your store is buying turnips for. As a reply the bot will use the wonderful [Turnip-Calculator by elxris](https://github.com/elxris/Turnip-Calculator).
+To add a score just mention the bot followed by pasting the output you get from the Wordle `Share` button. The bot will store this score in a database and let you know if it worked.
 
 ## Invite this bot to your Discord Server
 Use this Discord link to invite `DisGoNips` to your server: https://discordapp.com/api/oauth2/authorize?client_id=700138490813481070&permissions=215104&scope=bot

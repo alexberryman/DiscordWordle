@@ -1,7 +1,7 @@
 package main
 
 import (
-	"DiscordWordle/internal/turnips/generated-code"
+	"DiscordWordle/internal/wordle/generated-code"
 	"context"
 	"database/sql"
 	"fmt"
@@ -98,7 +98,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	botMentionToken := fmt.Sprintf("@%s", botName)
 	if strings.HasPrefix(tokenizedContent, botMentionToken) {
 		input := strings.TrimSpace(strings.Replace(tokenizedContent, botMentionToken, "", 1))
-		q := turnips.New(db)
+		q := wordle.New(db)
 		ctx := context.Background()
 
 		r.Emoji = "❌"
@@ -111,7 +111,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		existingNickname, err := q.CountNicknameByDiscordId(ctx, turnips.CountNicknameByDiscordIdParams{
+		existingNickname, err := q.CountNicknameByDiscordId(ctx, wordle.CountNicknameByDiscordIdParams{
 			DiscordID: m.Author.ID,
 			ServerID:  m.GuildID,
 		})
@@ -129,7 +129,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, input string, account turnips.Account, q *turnips.Queries, botMentionToken string) {
+func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, input string, account wordle.Account, q *wordle.Queries, botMentionToken string) {
 	var r response
 
 	if strings.Contains(input, cmdWordle) {

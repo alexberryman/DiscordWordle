@@ -10,7 +10,7 @@ import (
 
 func main() {
 	migrations := &migrate.FileMigrationSource{
-		Dir: "internal/turnips/schema",
+		Dir: "internal/wordle/schema",
 	}
 
 	DatabaseUrl := os.Getenv("DATABASE_URL")

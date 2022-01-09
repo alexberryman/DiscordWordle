@@ -1,22 +1,22 @@
 package main
 
 import (
-	turnips "DiscordWordle/internal/turnips/generated-code"
+	wordle "DiscordWordle/internal/wordle/generated-code"
 	"context"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 )
 
-func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a turnips.Account, gameId int, guesses int) {
+func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account, gameId int, guesses int) {
 	response, scoreObj := buildScoreObjFromInput(a, gameId, guesses)
 
-	scoreParams := turnips.CreateScoreParams{
+	scoreParams := wordle.CreateScoreParams{
 		DiscordID: a.DiscordID,
 		GameID:    scoreObj.GameID,
 		Guesses:   scoreObj.Guesses,
 	}
 
-	q := turnips.New(db)
+	q := wordle.New(db)
 	_, err := q.CreateScore(ctx, scoreParams)
 
 	if err != nil {
@@ -28,16 +28,16 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func updateExistingScore(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, a turnips.Account, gameId int, guesses int) {
-	response, turnipScoreObj := buildScoreObjFromInput(a, gameId, guesses)
+func updateExistingScore(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, a wordle.Account, gameId int, guesses int) {
+	response, wordlecoreObj := buildScoreObjFromInput(a, gameId, guesses)
 
-	priceParams := turnips.UpdateScoreParams{
+	priceParams := wordle.UpdateScoreParams{
 		DiscordID: a.DiscordID,
-		GameID:    turnipScoreObj.GameID,
-		Guesses:   turnipScoreObj.Guesses,
+		GameID:    wordlecoreObj.GameID,
+		Guesses:   wordlecoreObj.Guesses,
 	}
 
-	q := turnips.New(db)
+	q := wordle.New(db)
 	_, err := q.UpdateScore(ctx, priceParams)
 
 	if err != nil {
@@ -50,10 +50,10 @@ func updateExistingScore(ctx context.Context, s *discordgo.Session, m *discordgo
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func buildScoreObjFromInput(a turnips.Account, gameId int, guesses int) (response, turnips.WordleScore) {
+func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response, wordle.WordleScore) {
 	var response response
 
-	scoreThing := turnips.WordleScore{
+	scoreThing := wordle.WordleScore{
 		DiscordID: a.DiscordID,
 		GameID:    int32(gameId),
 		Guesses:   int32(guesses),
