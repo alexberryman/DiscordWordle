@@ -10,7 +10,7 @@ Mention the bot using `@BotName help` to see full list of commands
 To add a score just mention the bot followed by pasting the output you get from the Wordle `Share` button. The bot will store this score in a database and let you know if it worked.
 
 ## Invite this bot to your Discord Server
-Use this Discord link to invite `DisGoNips` to your server: https://discordapp.com/api/oauth2/authorize?client_id=700138490813481070&permissions=215104&scope=bot
+Use this Discord link to invite `Discordle` to your server: https://discordapp.com/api/oauth2/authorize?client_id=700138490813481070&permissions=215104&scope=bot
 
 This bot requests the following permissions:
 - Send Messages
