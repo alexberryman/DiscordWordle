@@ -1,0 +1,42 @@
+{
+  "name": "DiscordGoTurnips",
+  "description": "Discord bot written in Go to track Turnip prices",
+  "keywords": [
+    "postgresql",
+    "discord",
+    "go",
+    "animal-crossing",
+    "bot"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-addon-wait.git"
+    },
+    {
+      "url": "heroku/go"
+    }
+  ],
+  "website": "https://github.com/alexberryman/DiscordGoTurnips",
+  "repository": "https://github.com/alexberryman/DiscordGoTurnips",
+  "env": {
+    "DISCORD_TOKEN": {
+      "description": "The Discord Build-A-Bot Token used by the bot to authenticate with Discord",
+      "value": ""
+    }
+  },
+  "addons": [
+    "heroku-postgresql:hobby-dev"
+  ],
+  "environments": {
+    "review": {
+      "addons": [
+        "heroku-postgresql:hobby-dev"
+      ]
+    }
+  },
+  "formation": {
+    "bot": {
+      "quantity": 1
+    }
+  }
+}

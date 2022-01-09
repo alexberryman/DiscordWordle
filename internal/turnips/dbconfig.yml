@@ -1,0 +1,11 @@
+development:
+  dialect: postgres
+  datasource: ${DATABASE_URL}
+  dir: schema
+  table: migrations
+
+heroku:
+  dialect: postgres
+  datasource: ${DATABASE_URL}
+  dir: schema
+  table: migrations

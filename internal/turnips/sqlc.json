@@ -1,0 +1,16 @@
+
+{
+  "version": "1",
+  "packages": [
+    {
+      "path": "generated-code",
+      "name": "turnips",
+      "schema": "schema",
+      "queries": "query",
+      "engine": "postgresql",
+      "emit_json_tags": true,
+      "emit_prepared_queries": true,
+      "emit_interface": true
+    }
+  ]
+}

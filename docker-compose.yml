@@ -1,0 +1,18 @@
+version: '3'
+services:
+  database:
+    image: "postgres"
+    ports:
+    - 5432:5432
+    env_file:
+      - local.env
+    volumes:
+      - database-data:/var/lib/postgresql/data/
+  sqlc:
+    image: "kjconroy/sqlc"
+    volumes:
+    - /c/Users/alexb/go/src/DiscordGoTurnips/internal/turnips/:/src
+    working_dir: /src
+    command: generate
+volumes:
+  database-data:
