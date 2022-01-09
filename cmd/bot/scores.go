@@ -92,18 +92,27 @@ func scoreColorfulResponse(guesses int) response {
 	response.Emoji = "✅"
 	if guesses == 69 {
 		response.Text = "nice."
+	} else if guesses == 0 {
+		response.Text = "yikes 😨"
+		response.Emoji = "0️⃣"
 	} else if guesses == 1 {
 		response.Text = fmt.Sprintf("Oh, you got it in %d guess? Cheater. No one belives you.", guesses)
+		response.Emoji = "1️⃣"
 	} else if guesses == 2 {
 		response.Text = fmt.Sprintf("%d? Dope.", guesses)
+		response.Emoji = "2️⃣"
 	} else if guesses == 3 {
-		response.Text = fmt.Sprintf("Three is par for the course")
+		response.Text = fmt.Sprintf("Three is par for the course. Yes, par is three Brad! Why wouldn't it be?")
+		response.Emoji = "3️⃣"
 	} else if guesses == 4 {
 		response.Text = fmt.Sprintf("%d isn't that bad but you can do better", guesses)
+		response.Emoji = "4️⃣"
 	} else if guesses == 5 {
 		response.Text = fmt.Sprintf("Hey, at least you're not that other guy that took guesses 6 today. Sheesh")
+		response.Emoji = "5️⃣"
 	} else if guesses == 6 {
 		response.Text = fmt.Sprintf("You're really taking down to the wire using %d gusses", guesses)
+		response.Emoji = "6️⃣"
 	} else {
 		response.Text = "Is that even a real number? Did you fail to guess it?"
 		response.Emoji = "❌"

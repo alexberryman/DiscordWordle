@@ -33,6 +33,7 @@ const cmdHistory = "history"
 const cmdUpdate = "update"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
+const noSolutionResult = "X"
 
 func init() {
 	Token = os.Getenv("DISCORD_TOKEN")
@@ -153,7 +154,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 }
 
 func extractGameGuesses(input string) (int, int) {
-	var dataExp = regexp.MustCompile(`(?P<game_id>\d+)\s(?P<guesses>\d+)`)
+	var dataExp = regexp.MustCompile(fmt.Sprintf(`(?P<game_id>\d+)\s(?P<guesses>\d+|%s)/6`, noSolutionResult))
 	match := dataExp.FindStringSubmatch(input)
 	result := make(map[string]string)
 	for i, name := range dataExp.SubexpNames() {
@@ -162,7 +163,12 @@ func extractGameGuesses(input string) (int, int) {
 		}
 	}
 	gameId, _ := strconv.Atoi(result["game_id"])
-	guesses, _ := strconv.Atoi(result["guesses"])
+	var guesses int
+	if strings.ToUpper(result["guesses"]) == noSolutionResult {
+		guesses = 0
+	} else {
+		guesses, _ = strconv.Atoi(result["guesses"])
+	}
 	return gameId, guesses
 }
 
