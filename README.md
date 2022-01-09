@@ -5,7 +5,8 @@
 A bot for discord to store and track Wordle scores.
 
 ## Usage
-Mention the bot using `@BotName help` to see full list of commands
+Mention the bot using `@BotName help` to see full list of commands:
+![usage image](docs/images/usage.png)
 
 To add a score just mention the bot followed by pasting the output you get from the Wordle `Share` button. The bot will store this score in a database and let you know if it worked.
 
