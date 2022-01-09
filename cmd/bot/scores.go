@@ -76,7 +76,7 @@ func scoreColorfulResponse(guesses int) response {
 	} else if guesses == 4 {
 		response.Text = fmt.Sprintf("%d isn't that bad but you can do better", guesses)
 	} else if guesses == 5 {
-		response.Text = fmt.Sprintf("Hey, at least you're not the guy that got 6 today.")
+		response.Text = fmt.Sprintf("Hey, at least you're not that other guy that took guesses 6 today. Sheesh")
 	} else if guesses == 6 {
 		response.Text = fmt.Sprintf("You're really taking down to the wire using %d gusses", guesses)
 	} else {
