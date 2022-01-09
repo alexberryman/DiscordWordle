@@ -146,6 +146,8 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 
 		persistScore(ctx, m, s, account, id, guesses)
 
+	} else if strings.HasPrefix(input, cmdHistory) {
+		getScores(ctx, m, s, account)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {

@@ -28,6 +28,31 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func getScores(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account) {
+
+	historyByAccountParams := wordle.GetScoreHistoryByAccountParams{
+		DiscordID: a.DiscordID,
+		ServerID:  m.GuildID,
+	}
+
+	q := wordle.New(db)
+	scores, err := q.GetScoreHistoryByAccount(ctx, historyByAccountParams)
+
+	var response response
+
+	if err != nil {
+		response.Emoji = "⛔"
+		response.Text = "Not finding any previous scores"
+	} else {
+		response.Emoji = "👍"
+		response.Text = fmt.Sprintf("Found dem %d scores, boss!", len(scores))
+		for _, v := range scores {
+			response.Text += fmt.Sprintf("\n game: %d - %d/6", v.GameID, v.Guesses)
+		}
+	}
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func updateExistingScore(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, a wordle.Account, gameId int, guesses int) {
 	response, wordlecoreObj := buildScoreObjFromInput(a, gameId, guesses)
 
