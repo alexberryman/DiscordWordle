@@ -53,7 +53,7 @@ func getScores(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Ses
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func updateExistingScore(ctx context.Context, s *discordgo.Session, m *discordgo.MessageCreate, a wordle.Account, gameId int, guesses int) {
+func updateExistingScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account, gameId int, guesses int) {
 	response, wordlecoreObj := buildScoreObjFromInput(a, gameId, guesses)
 
 	priceParams := wordle.UpdateScoreParams{

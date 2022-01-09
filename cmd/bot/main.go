@@ -30,6 +30,7 @@ type response struct {
 var db *sql.DB
 
 const cmdHistory = "history"
+const cmdUpdate = "update"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 
@@ -133,19 +134,12 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	var r response
 
 	if strings.Contains(input, cmdWordle) {
-		var dataExp = regexp.MustCompile(`Wordle\s(?P<game_id>\d+)\s(?P<guesses>\d+)/6`)
-		match := dataExp.FindStringSubmatch(input)
-		result := make(map[string]string)
-		for i, name := range dataExp.SubexpNames() {
-			if i != 0 && name != "" {
-				result[name] = match[i]
-			}
-		}
-		id, _ := strconv.Atoi(result["game_id"])
-		guesses, _ := strconv.Atoi(result["guesses"])
+		gameId, guesses := extractGameGuesses(input)
+		persistScore(ctx, m, s, account, gameId, guesses)
 
-		persistScore(ctx, m, s, account, id, guesses)
-
+	} else if strings.HasPrefix(input, cmdUpdate) {
+		gameId, guesses := extractGameGuesses(input)
+		updateExistingScore(ctx, m, s, account, gameId, guesses)
 	} else if strings.HasPrefix(input, cmdHistory) {
 		getScores(ctx, m, s, account)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
@@ -156,6 +150,20 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 		r.Text = "Wut?"
 		flushEmojiAndResponseToDiscord(s, m, r)
 	}
+}
+
+func extractGameGuesses(input string) (int, int) {
+	var dataExp = regexp.MustCompile(`(?P<game_id>\d+)\s(?P<guesses>\d+)`)
+	match := dataExp.FindStringSubmatch(input)
+	result := make(map[string]string)
+	for i, name := range dataExp.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+	gameId, _ := strconv.Atoi(result["game_id"])
+	guesses, _ := strconv.Atoi(result["guesses"])
+	return gameId, guesses
 }
 
 func flushEmojiAndResponseToDiscord(s *discordgo.Session, m *discordgo.MessageCreate, r response) {
