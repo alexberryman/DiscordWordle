@@ -31,6 +31,7 @@ var db *sql.DB
 
 const cmdHistory = "history"
 const cmdUpdate = "update"
+const cmdQuip = "quip"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 const noSolutionResult = "X"
@@ -145,25 +146,29 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 		updateExistingScore(ctx, m, s, account, gameId, guesses)
 	} else if strings.HasPrefix(input, cmdHistory) {
 		getScores(ctx, m, s, account)
+	} else if strings.HasPrefix(input, cmdQuip) {
+		score, phrase := extractScorePhrase(input)
+		persistPhrase(ctx, m, s, account, score, phrase)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {
-		helpResponse(s, m, botMentionToken, cmdHistory, cmdTimeZone)
+		helpResponse(s, m, botMentionToken, cmdHistory, cmdTimeZone, cmdQuip)
 	} else {
 		r.Text = "Wut?"
 		flushEmojiAndResponseToDiscord(s, m, r)
 	}
 }
 
+func extractScorePhrase(input string) (int, string) {
+	var dataExp = regexp.MustCompile(`(?P<score>\d+)\s(?P<phrase>.+)`)
+	result := matchGroupsToStringMap(input, dataExp)
+	score, _ := strconv.Atoi(result["score"])
+	return score, result["phrase"]
+}
+
 func extractGameGuesses(input string) (int, int) {
 	var dataExp = regexp.MustCompile(fmt.Sprintf(`(?P<game_id>\d+)\s(?P<guesses>\d+|%s)`, noSolutionResult))
-	match := dataExp.FindStringSubmatch(input)
-	result := make(map[string]string)
-	for i, name := range dataExp.SubexpNames() {
-		if i != 0 && name != "" {
-			result[name] = match[i]
-		}
-	}
+	result := matchGroupsToStringMap(input, dataExp)
 	gameId, _ := strconv.Atoi(result["game_id"])
 	var guesses int
 	if strings.ToUpper(result["guesses"]) == noSolutionResult {
@@ -174,15 +179,31 @@ func extractGameGuesses(input string) (int, int) {
 	return gameId, guesses
 }
 
+func matchGroupsToStringMap(input string, dataExp *regexp.Regexp) map[string]string {
+	match := dataExp.FindStringSubmatch(input)
+	if len(match) == 0 {
+		log.Println(fmt.Sprintf("%s didn't match %s", input, dataExp))
+	}
+	result := make(map[string]string)
+	for i, name := range dataExp.SubexpNames() {
+		if i != 0 && name != "" {
+			result[name] = match[i]
+		}
+	}
+	return result
+}
+
 func flushEmojiAndResponseToDiscord(s *discordgo.Session, m *discordgo.MessageCreate, r response) {
 	reactToMessage(s, m, r.Emoji)
 	respondAsNewMessage(s, m, r.Text)
 }
 
 func respondAsNewMessage(s *discordgo.Session, m *discordgo.MessageCreate, response string) {
-	_, err := s.ChannelMessageSend(m.ChannelID, response)
-	if err != nil {
-		log.Println("Error responding:", err)
+	if response != "" {
+		_, err := s.ChannelMessageSend(m.ChannelID, response)
+		if err != nil {
+			log.Println("Error responding:", err)
+		}
 	}
 }
 

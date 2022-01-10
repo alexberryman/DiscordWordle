@@ -29,6 +29,28 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func persistPhrase(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, phrase string) {
+	phraseParams := wordle.CreateResponseForScoreParams{
+		ScoreValue:         int32(score),
+		Response:           phrase,
+		InsideJoke:         true,
+		InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
+		CreatedByAccount:   account.DiscordID,
+	}
+
+	q := wordle.New(db)
+	_, err := q.CreateResponseForScore(ctx, phraseParams)
+	var response response
+	if err != nil {
+		response.Emoji = "⛔"
+		response.Text = "Them words area not right"
+	} else {
+		response.Emoji = "🤣"
+	}
+
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func getScores(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account) {
 
 	historyByAccountParams := wordle.GetScoreHistoryByAccountParams{

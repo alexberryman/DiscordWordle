@@ -37,6 +37,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.createNicknameStmt, err = db.PrepareContext(ctx, createNickname); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateNickname: %w", err)
 	}
+	if q.createResponseForScoreStmt, err = db.PrepareContext(ctx, createResponseForScore); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateResponseForScore: %w", err)
+	}
 	if q.createScoreStmt, err = db.PrepareContext(ctx, createScore); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateScore: %w", err)
 	}
@@ -57,6 +60,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getResponseByScoreStmt, err = db.PrepareContext(ctx, getResponseByScore); err != nil {
 		return nil, fmt.Errorf("error preparing query GetResponseByScore: %w", err)
+	}
+	if q.getResponsesByCreatedByAccountStmt, err = db.PrepareContext(ctx, getResponsesByCreatedByAccount); err != nil {
+		return nil, fmt.Errorf("error preparing query GetResponsesByCreatedByAccount: %w", err)
 	}
 	if q.getScoreHistoryByAccountStmt, err = db.PrepareContext(ctx, getScoreHistoryByAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetScoreHistoryByAccount: %w", err)
@@ -109,6 +115,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createNicknameStmt: %w", cerr)
 		}
 	}
+	if q.createResponseForScoreStmt != nil {
+		if cerr := q.createResponseForScoreStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createResponseForScoreStmt: %w", cerr)
+		}
+	}
 	if q.createScoreStmt != nil {
 		if cerr := q.createScoreStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing createScoreStmt: %w", cerr)
@@ -142,6 +153,11 @@ func (q *Queries) Close() error {
 	if q.getResponseByScoreStmt != nil {
 		if cerr := q.getResponseByScoreStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getResponseByScoreStmt: %w", cerr)
+		}
+	}
+	if q.getResponsesByCreatedByAccountStmt != nil {
+		if cerr := q.getResponsesByCreatedByAccountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getResponsesByCreatedByAccountStmt: %w", cerr)
 		}
 	}
 	if q.getScoreHistoryByAccountStmt != nil {
@@ -216,51 +232,55 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 }
 
 type Queries struct {
-	db                           DBTX
-	tx                           *sql.Tx
-	countAccountsByDiscordIdStmt *sql.Stmt
-	countNicknameByDiscordIdStmt *sql.Stmt
-	countScoresByDiscordIdStmt   *sql.Stmt
-	createAccountStmt            *sql.Stmt
-	createNicknameStmt           *sql.Stmt
-	createScoreStmt              *sql.Stmt
-	deleteAccountStmt            *sql.Stmt
-	deleteNicknameStmt           *sql.Stmt
-	deleteScoresForUserStmt      *sql.Stmt
-	getAccountStmt               *sql.Stmt
-	getNicknameStmt              *sql.Stmt
-	getResponseByScoreStmt       *sql.Stmt
-	getScoreHistoryByAccountStmt *sql.Stmt
-	listAccountsStmt             *sql.Stmt
-	listNicknamesStmt            *sql.Stmt
-	listScoresStmt               *sql.Stmt
-	updateNicknameStmt           *sql.Stmt
-	updateScoreStmt              *sql.Stmt
-	updateTimeZoneStmt           *sql.Stmt
+	db                                 DBTX
+	tx                                 *sql.Tx
+	countAccountsByDiscordIdStmt       *sql.Stmt
+	countNicknameByDiscordIdStmt       *sql.Stmt
+	countScoresByDiscordIdStmt         *sql.Stmt
+	createAccountStmt                  *sql.Stmt
+	createNicknameStmt                 *sql.Stmt
+	createResponseForScoreStmt         *sql.Stmt
+	createScoreStmt                    *sql.Stmt
+	deleteAccountStmt                  *sql.Stmt
+	deleteNicknameStmt                 *sql.Stmt
+	deleteScoresForUserStmt            *sql.Stmt
+	getAccountStmt                     *sql.Stmt
+	getNicknameStmt                    *sql.Stmt
+	getResponseByScoreStmt             *sql.Stmt
+	getResponsesByCreatedByAccountStmt *sql.Stmt
+	getScoreHistoryByAccountStmt       *sql.Stmt
+	listAccountsStmt                   *sql.Stmt
+	listNicknamesStmt                  *sql.Stmt
+	listScoresStmt                     *sql.Stmt
+	updateNicknameStmt                 *sql.Stmt
+	updateScoreStmt                    *sql.Stmt
+	updateTimeZoneStmt                 *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
-		db:                           tx,
-		tx:                           tx,
-		countAccountsByDiscordIdStmt: q.countAccountsByDiscordIdStmt,
-		countNicknameByDiscordIdStmt: q.countNicknameByDiscordIdStmt,
-		countScoresByDiscordIdStmt:   q.countScoresByDiscordIdStmt,
-		createAccountStmt:            q.createAccountStmt,
-		createNicknameStmt:           q.createNicknameStmt,
-		createScoreStmt:              q.createScoreStmt,
-		deleteAccountStmt:            q.deleteAccountStmt,
-		deleteNicknameStmt:           q.deleteNicknameStmt,
-		deleteScoresForUserStmt:      q.deleteScoresForUserStmt,
-		getAccountStmt:               q.getAccountStmt,
-		getNicknameStmt:              q.getNicknameStmt,
-		getResponseByScoreStmt:       q.getResponseByScoreStmt,
-		getScoreHistoryByAccountStmt: q.getScoreHistoryByAccountStmt,
-		listAccountsStmt:             q.listAccountsStmt,
-		listNicknamesStmt:            q.listNicknamesStmt,
-		listScoresStmt:               q.listScoresStmt,
-		updateNicknameStmt:           q.updateNicknameStmt,
-		updateScoreStmt:              q.updateScoreStmt,
-		updateTimeZoneStmt:           q.updateTimeZoneStmt,
+		db:                                 tx,
+		tx:                                 tx,
+		countAccountsByDiscordIdStmt:       q.countAccountsByDiscordIdStmt,
+		countNicknameByDiscordIdStmt:       q.countNicknameByDiscordIdStmt,
+		countScoresByDiscordIdStmt:         q.countScoresByDiscordIdStmt,
+		createAccountStmt:                  q.createAccountStmt,
+		createNicknameStmt:                 q.createNicknameStmt,
+		createResponseForScoreStmt:         q.createResponseForScoreStmt,
+		createScoreStmt:                    q.createScoreStmt,
+		deleteAccountStmt:                  q.deleteAccountStmt,
+		deleteNicknameStmt:                 q.deleteNicknameStmt,
+		deleteScoresForUserStmt:            q.deleteScoresForUserStmt,
+		getAccountStmt:                     q.getAccountStmt,
+		getNicknameStmt:                    q.getNicknameStmt,
+		getResponseByScoreStmt:             q.getResponseByScoreStmt,
+		getResponsesByCreatedByAccountStmt: q.getResponsesByCreatedByAccountStmt,
+		getScoreHistoryByAccountStmt:       q.getScoreHistoryByAccountStmt,
+		listAccountsStmt:                   q.listAccountsStmt,
+		listNicknamesStmt:                  q.listNicknamesStmt,
+		listScoresStmt:                     q.listScoresStmt,
+		updateNicknameStmt:                 q.updateNicknameStmt,
+		updateScoreStmt:                    q.updateScoreStmt,
+		updateTimeZoneStmt:                 q.updateTimeZoneStmt,
 	}
 }

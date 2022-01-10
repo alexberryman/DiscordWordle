@@ -12,6 +12,7 @@ type Querier interface {
 	CountScoresByDiscordId(ctx context.Context, discordID string) (int64, error)
 	CreateAccount(ctx context.Context, discordID string) (Account, error)
 	CreateNickname(ctx context.Context, arg CreateNicknameParams) (Nickname, error)
+	CreateResponseForScore(ctx context.Context, arg CreateResponseForScoreParams) (Response, error)
 	CreateScore(ctx context.Context, arg CreateScoreParams) (WordleScore, error)
 	DeleteAccount(ctx context.Context, discordID string) error
 	DeleteNickname(ctx context.Context, discordID string) error
@@ -19,6 +20,7 @@ type Querier interface {
 	GetAccount(ctx context.Context, discordID string) (Account, error)
 	GetNickname(ctx context.Context, arg GetNicknameParams) (Nickname, error)
 	GetResponseByScore(ctx context.Context, arg GetResponseByScoreParams) (Response, error)
+	GetResponsesByCreatedByAccount(ctx context.Context, createdByAccount string) ([]Response, error)
 	GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHistoryByAccountParams) ([]GetScoreHistoryByAccountRow, error)
 	ListAccounts(ctx context.Context) ([]Account, error)
 	ListNicknames(ctx context.Context) ([]Nickname, error)
