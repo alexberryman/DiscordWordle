@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"log"
 )
 
 func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account, gameId int, guesses int) {
@@ -29,25 +30,41 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func persistPhrase(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, phrase string) {
-	phraseParams := wordle.CreateResponseForScoreParams{
-		ScoreValue:         int32(score),
-		Response:           phrase,
-		InsideJoke:         true,
-		InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
-		CreatedByAccount:   account.DiscordID,
-	}
-
-	q := wordle.New(db)
-	_, err := q.CreateResponseForScore(ctx, phraseParams)
-	var response response
-	if err != nil {
-		response.Emoji = "⛔"
-		response.Text = "Them words area not right"
+func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, quip string) {
+	var nicknames []wordle.Nickname
+	if m.GuildID == "" {
+		q := wordle.New(db)
+		nicknames, _ = q.GetNicknamesByDiscordId(ctx, account.DiscordID)
 	} else {
-		response.Emoji = "🤣"
+		nicknames = append(nicknames, wordle.Nickname{
+			DiscordID: account.DiscordID,
+			ServerID:  m.GuildID,
+			Nickname:  m.Member.Nick,
+		})
 	}
 
+	var response response
+	for _, nick := range nicknames {
+		quipParams := wordle.CreateQuipForScoreParams{
+			ScoreValue:         int32(score),
+			Quip:               quip,
+			InsideJoke:         true,
+			InsideJokeServerID: sql.NullString{String: nick.ServerID, Valid: true},
+			CreatedByAccount:   nick.DiscordID,
+		}
+
+		q := wordle.New(db)
+		_, err := q.CreateQuipForScore(ctx, quipParams)
+		if err != nil {
+			log.Println(err)
+			response.Emoji = "⛔"
+			response.Text = "Them words area not right"
+			flushEmojiAndResponseToDiscord(s, m, response)
+			return
+		}
+	}
+
+	response.Emoji = "🤣"
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
@@ -119,14 +136,14 @@ func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.Messag
 
 func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCreate, response response) response {
 	if guesses >= 0 && guesses <= 6 {
-		responseParams := wordle.GetResponseByScoreParams{
+		responseParams := wordle.GetQuipByScoreParams{
 			ScoreValue:         int32(guesses),
 			InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
 		}
 
 		q := wordle.New(db)
-		r, _ := q.GetResponseByScore(ctx, responseParams)
-		response.Text = r.Response
+		r, _ := q.GetQuipByScore(ctx, responseParams)
+		response.Text = r.Quip
 	} else if guesses == 69 {
 		response.Text = "nice."
 	} else {

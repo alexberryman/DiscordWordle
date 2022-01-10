@@ -7,20 +7,20 @@ import (
 	"context"
 )
 
-const countNicknameByDiscordId = `-- name: CountNicknameByDiscordId :one
+const countNicknameByDiscordIdAndServerId = `-- name: CountNicknameByDiscordIdAndServerId :one
 SELECT count(*)
 FROM nicknames
 where discord_id = $1
   and server_id = $2
 `
 
-type CountNicknameByDiscordIdParams struct {
+type CountNicknameByDiscordIdAndServerIdParams struct {
 	DiscordID string `json:"discord_id"`
 	ServerID  string `json:"server_id"`
 }
 
-func (q *Queries) CountNicknameByDiscordId(ctx context.Context, arg CountNicknameByDiscordIdParams) (int64, error) {
-	row := q.queryRow(ctx, q.countNicknameByDiscordIdStmt, countNicknameByDiscordId, arg.DiscordID, arg.ServerID)
+func (q *Queries) CountNicknameByDiscordIdAndServerId(ctx context.Context, arg CountNicknameByDiscordIdAndServerIdParams) (int64, error) {
+	row := q.queryRow(ctx, q.countNicknameByDiscordIdAndServerIdStmt, countNicknameByDiscordIdAndServerId, arg.DiscordID, arg.ServerID)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
@@ -74,6 +74,35 @@ func (q *Queries) GetNickname(ctx context.Context, arg GetNicknameParams) (Nickn
 	var i Nickname
 	err := row.Scan(&i.DiscordID, &i.ServerID, &i.Nickname)
 	return i, err
+}
+
+const getNicknamesByDiscordId = `-- name: GetNicknamesByDiscordId :many
+SELECT discord_id, server_id, nickname
+FROM nicknames
+where discord_id = $1
+`
+
+func (q *Queries) GetNicknamesByDiscordId(ctx context.Context, discordID string) ([]Nickname, error) {
+	rows, err := q.query(ctx, q.getNicknamesByDiscordIdStmt, getNicknamesByDiscordId, discordID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Nickname
+	for rows.Next() {
+		var i Nickname
+		if err := rows.Scan(&i.DiscordID, &i.ServerID, &i.Nickname); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listNicknames = `-- name: ListNicknames :many

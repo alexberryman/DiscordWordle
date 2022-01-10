@@ -114,7 +114,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		existingNickname, err := q.CountNicknameByDiscordId(ctx, wordle.CountNicknameByDiscordIdParams{
+		existingNickname, err := q.CountNicknameByDiscordIdAndServerId(ctx, wordle.CountNicknameByDiscordIdAndServerIdParams{
 			DiscordID: m.Author.ID,
 			ServerID:  m.GuildID,
 		})
@@ -126,7 +126,15 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		account := getOrCreateAccount(ctx, s, m, existingAccount, existingNickname, q)
+		var account wordle.Account
+		if m.Message.GuildID != "" {
+			account = getOrCreateAccount(ctx, s, m, existingAccount, existingNickname, q)
+		} else {
+			account = wordle.Account{
+				DiscordID: m.Message.Author.ID,
+				TimeZone:  "America/Chicago",
+			}
+		}
 
 		routeMessageToAction(ctx, s, m, input, account, q, botMentionToken)
 	}
@@ -147,8 +155,8 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdHistory) {
 		getScores(ctx, m, s, account)
 	} else if strings.HasPrefix(input, cmdQuip) {
-		score, phrase := extractScorePhrase(input)
-		persistPhrase(ctx, m, s, account, score, phrase)
+		score, quip := extractScoreQuip(input)
+		persistQuip(ctx, m, s, account, score, quip)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {
@@ -159,11 +167,11 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	}
 }
 
-func extractScorePhrase(input string) (int, string) {
-	var dataExp = regexp.MustCompile(`(?P<score>\d+)\s(?P<phrase>.+)`)
+func extractScoreQuip(input string) (int, string) {
+	var dataExp = regexp.MustCompile(`(?P<score>\d+)\s(?P<quip>.+)`)
 	result := matchGroupsToStringMap(input, dataExp)
 	score, _ := strconv.Atoi(result["score"])
-	return score, result["phrase"]
+	return score, result["quip"]
 }
 
 func extractGameGuesses(input string) (int, int) {

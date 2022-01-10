@@ -18,10 +18,10 @@ type Nickname struct {
 	Nickname  string `json:"nickname"`
 }
 
-type Response struct {
+type Quip struct {
 	ID                 int64          `json:"id"`
 	ScoreValue         int32          `json:"score_value"`
-	Response           string         `json:"response"`
+	Quip               string         `json:"quip"`
 	InsideJoke         bool           `json:"inside_joke"`
 	InsideJokeServerID sql.NullString `json:"inside_joke_server_id"`
 	CreatedByAccount   string         `json:"created_by_account"`
