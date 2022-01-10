@@ -10,7 +10,12 @@ SELECT *
 FROM nicknames
 ORDER BY discord_id;
 
--- name: CountNicknameByDiscordId :one
+-- name: GetNicknamesByDiscordId :many
+SELECT *
+FROM nicknames
+where discord_id = $1;
+
+-- name: CountNicknameByDiscordIdAndServerId :one
 SELECT count(*)
 FROM nicknames
 where discord_id = $1
