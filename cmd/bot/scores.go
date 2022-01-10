@@ -3,6 +3,7 @@ package main
 import (
 	wordle "DiscordWordle/internal/wordle/generated-code"
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 )
@@ -23,7 +24,7 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 		response.Emoji = "⛔"
 		response.Text = "You already created a price for this game, try updating it if it's wrong"
 	} else {
-		response = scoreColorfulResponse(guesses, m)
+		response = scoreColorfulResponse(guesses, ctx, m)
 	}
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
@@ -69,7 +70,7 @@ func updateExistingScore(ctx context.Context, m *discordgo.MessageCreate, s *dis
 		response.Emoji = "⛔"
 		response.Text = "I didn't find an existing price."
 	} else {
-		response = scoreColorfulResponse(guesses, m)
+		response = scoreColorfulResponse(guesses, ctx, m)
 	}
 
 	flushEmojiAndResponseToDiscord(s, m, response)
@@ -87,20 +88,23 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 	return response, scoreThing
 }
 
-func scoreColorfulResponse(guesses int, m *discordgo.MessageCreate) response {
+func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.MessageCreate) response {
 	var response response
-	response = selectResponseText(guesses, m, response)
+	response = selectResponseText(guesses, ctx, m, response)
 	response = selectResponseEmoji(guesses, response)
 	return response
 }
 
-func selectResponseText(guesses int, m *discordgo.MessageCreate, response response) response {
+func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCreate, response response) response {
 	if guesses >= 0 && guesses <= 6 {
 		responseParams := wordle.GetResponseByScoreParams{
-			ScoreValue:         guesses,
-			InsideJokeServerID: m.GuildID,
+			ScoreValue:         int32(guesses),
+			InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
 		}
 
+		q := wordle.New(db)
+		r, _ := q.GetResponseByScore(ctx, responseParams)
+		response.Text = r.Response
 	} else if guesses == 69 {
 		response.Text = "nice."
 	} else {

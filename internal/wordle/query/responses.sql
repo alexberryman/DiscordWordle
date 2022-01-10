@@ -13,4 +13,4 @@ where created_by_account = $1;
 
 -- CreateResponseForScore :one
 insert into responses (score_value, response, inside_joke, inside_joke_server_id, created_by_account)
-VALUES ($1, $2, $3, $4, $5);
+VALUES ($1, $2, $3, $4, $5) returning *;

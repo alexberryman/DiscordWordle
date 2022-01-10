@@ -21,7 +21,6 @@ type Nickname struct {
 type Response struct {
 	ID                 int64          `json:"id"`
 	ScoreValue         int32          `json:"score_value"`
-	InjectScore        bool           `json:"inject_score"`
 	Response           string         `json:"response"`
 	InsideJoke         bool           `json:"inside_joke"`
 	InsideJokeServerID sql.NullString `json:"inside_joke_server_id"`

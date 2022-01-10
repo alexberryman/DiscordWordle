@@ -156,7 +156,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 }
 
 func extractGameGuesses(input string) (int, int) {
-	var dataExp = regexp.MustCompile(fmt.Sprintf(`(?P<game_id>\d+)\s(?P<guesses>\d+|%s)/6`, noSolutionResult))
+	var dataExp = regexp.MustCompile(fmt.Sprintf(`(?P<game_id>\d+)\s(?P<guesses>\d+|%s)`, noSolutionResult))
 	match := dataExp.FindStringSubmatch(input)
 	result := make(map[string]string)
 	for i, name := range dataExp.SubexpNames() {
