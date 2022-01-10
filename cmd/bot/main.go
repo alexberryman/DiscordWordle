@@ -135,7 +135,9 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	var r response
 
 	if strings.Contains(input, cmdWordle) {
+		log.Println("Found a Wordle")
 		gameId, guesses := extractGameGuesses(input)
+		log.Println(fmt.Sprintf("%d - %d for %s", gameId, guesses, m.Author.Username))
 		persistScore(ctx, m, s, account, gameId, guesses)
 
 	} else if strings.HasPrefix(input, cmdUpdate) {
