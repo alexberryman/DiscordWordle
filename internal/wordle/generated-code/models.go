@@ -3,6 +3,7 @@
 package wordle
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -15,6 +16,17 @@ type Nickname struct {
 	DiscordID string `json:"discord_id"`
 	ServerID  string `json:"server_id"`
 	Nickname  string `json:"nickname"`
+}
+
+type Response struct {
+	ID                 int64          `json:"id"`
+	ScoreValue         int32          `json:"score_value"`
+	InjectScore        bool           `json:"inject_score"`
+	Response           string         `json:"response"`
+	InsideJoke         bool           `json:"inside_joke"`
+	InsideJokeServerID sql.NullString `json:"inside_joke_server_id"`
+	CreatedByAccount   string         `json:"created_by_account"`
+	CreatedAt          time.Time      `json:"created_at"`
 }
 
 type WordleScore struct {

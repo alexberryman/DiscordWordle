@@ -55,6 +55,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getNicknameStmt, err = db.PrepareContext(ctx, getNickname); err != nil {
 		return nil, fmt.Errorf("error preparing query GetNickname: %w", err)
 	}
+	if q.getResponseByScoreStmt, err = db.PrepareContext(ctx, getResponseByScore); err != nil {
+		return nil, fmt.Errorf("error preparing query GetResponseByScore: %w", err)
+	}
 	if q.getScoreHistoryByAccountStmt, err = db.PrepareContext(ctx, getScoreHistoryByAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetScoreHistoryByAccount: %w", err)
 	}
@@ -134,6 +137,11 @@ func (q *Queries) Close() error {
 	if q.getNicknameStmt != nil {
 		if cerr := q.getNicknameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getNicknameStmt: %w", cerr)
+		}
+	}
+	if q.getResponseByScoreStmt != nil {
+		if cerr := q.getResponseByScoreStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getResponseByScoreStmt: %w", cerr)
 		}
 	}
 	if q.getScoreHistoryByAccountStmt != nil {
@@ -221,6 +229,7 @@ type Queries struct {
 	deleteScoresForUserStmt      *sql.Stmt
 	getAccountStmt               *sql.Stmt
 	getNicknameStmt              *sql.Stmt
+	getResponseByScoreStmt       *sql.Stmt
 	getScoreHistoryByAccountStmt *sql.Stmt
 	listAccountsStmt             *sql.Stmt
 	listNicknamesStmt            *sql.Stmt
@@ -245,6 +254,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteScoresForUserStmt:      q.deleteScoresForUserStmt,
 		getAccountStmt:               q.getAccountStmt,
 		getNicknameStmt:              q.getNicknameStmt,
+		getResponseByScoreStmt:       q.getResponseByScoreStmt,
 		getScoreHistoryByAccountStmt: q.getScoreHistoryByAccountStmt,
 		listAccountsStmt:             q.listAccountsStmt,
 		listNicknamesStmt:            q.listNicknamesStmt,

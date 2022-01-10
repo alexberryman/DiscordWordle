@@ -18,6 +18,7 @@ type Querier interface {
 	DeleteScoresForUser(ctx context.Context, discordID string) error
 	GetAccount(ctx context.Context, discordID string) (Account, error)
 	GetNickname(ctx context.Context, arg GetNicknameParams) (Nickname, error)
+	GetResponseByScore(ctx context.Context, arg GetResponseByScoreParams) (Response, error)
 	GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHistoryByAccountParams) ([]GetScoreHistoryByAccountRow, error)
 	ListAccounts(ctx context.Context) ([]Account, error)
 	ListNicknames(ctx context.Context) ([]Nickname, error)

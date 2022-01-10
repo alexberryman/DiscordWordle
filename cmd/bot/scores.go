@@ -23,7 +23,7 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 		response.Emoji = "⛔"
 		response.Text = "You already created a price for this game, try updating it if it's wrong"
 	} else {
-		response = scoreColorfulResponse(guesses)
+		response = scoreColorfulResponse(guesses, m)
 	}
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
@@ -69,7 +69,7 @@ func updateExistingScore(ctx context.Context, m *discordgo.MessageCreate, s *dis
 		response.Emoji = "⛔"
 		response.Text = "I didn't find an existing price."
 	} else {
-		response = scoreColorfulResponse(guesses)
+		response = scoreColorfulResponse(guesses, m)
 	}
 
 	flushEmojiAndResponseToDiscord(s, m, response)
@@ -87,16 +87,20 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 	return response, scoreThing
 }
 
-func scoreColorfulResponse(guesses int) response {
+func scoreColorfulResponse(guesses int, m *discordgo.MessageCreate) response {
 	var response response
-	response = selectResponseText(guesses, response)
+	response = selectResponseText(guesses, m, response)
 	response = selectResponseEmoji(guesses, response)
 	return response
 }
 
-func selectResponseText(guesses int, response response) response {
+func selectResponseText(guesses int, m *discordgo.MessageCreate, response response) response {
 	if guesses >= 0 && guesses <= 6 {
-		response.Text = "Congrats"
+		responseParams := wordle.GetResponseByScoreParams{
+			ScoreValue:         guesses,
+			InsideJokeServerID: m.GuildID,
+		}
+
 	} else if guesses == 69 {
 		response.Text = "nice."
 	} else {
