@@ -89,33 +89,43 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 
 func scoreColorfulResponse(guesses int) response {
 	var response response
-	response.Emoji = "✅"
-	if guesses == 69 {
+	response = selectResponseText(guesses, response)
+	response = selectResponseEmoji(guesses, response)
+	return response
+}
+
+func selectResponseText(guesses int, response response) response {
+	if guesses >= 0 && guesses <= 6 {
+		response.Text = "Congrats"
+	} else if guesses == 69 {
 		response.Text = "nice."
-	} else if guesses == 0 {
-		response.Text = "yikes 😨"
-		response.Emoji = "0️⃣"
-	} else if guesses == 1 {
-		response.Text = fmt.Sprintf("Oh, you got it in %d guess? Cheater. No one belives you.", guesses)
-		response.Emoji = "1️⃣"
-	} else if guesses == 2 {
-		response.Text = fmt.Sprintf("%d? Dope.", guesses)
-		response.Emoji = "2️⃣"
-	} else if guesses == 3 {
-		response.Text = fmt.Sprintf("Three is par for the course. Yes, par is three Brad! Why wouldn't it be?")
-		response.Emoji = "3️⃣"
-	} else if guesses == 4 {
-		response.Text = fmt.Sprintf("%d isn't that bad but you can do better", guesses)
-		response.Emoji = "4️⃣"
-	} else if guesses == 5 {
-		response.Text = fmt.Sprintf("Hey, at least you're not that other guy that took guesses 6 today. Sheesh")
-		response.Emoji = "5️⃣"
-	} else if guesses == 6 {
-		response.Text = fmt.Sprintf("You're really taking down to the wire using %d gusses", guesses)
-		response.Emoji = "6️⃣"
 	} else {
 		response.Text = "Is that even a real number? Did you fail to guess it?"
+	}
+
+	return response
+}
+
+func selectResponseEmoji(guesses int, response response) response {
+	if guesses == 69 {
+		response.Emoji = "♋️"
+	} else if guesses == 0 {
+		response.Emoji = "0️⃣"
+	} else if guesses == 1 {
+		response.Emoji = "1️⃣"
+	} else if guesses == 2 {
+		response.Emoji = "2️⃣"
+	} else if guesses == 3 {
+		response.Emoji = "3️⃣"
+	} else if guesses == 4 {
+		response.Emoji = "4️⃣"
+	} else if guesses == 5 {
+		response.Emoji = "5️⃣"
+	} else if guesses == 6 {
+		response.Emoji = "6️⃣"
+	} else {
 		response.Emoji = "❌"
 	}
+
 	return response
 }
