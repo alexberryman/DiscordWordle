@@ -2,11 +2,13 @@ package main
 
 import (
 	wordle "DiscordWordle/internal/wordle/generated-code"
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"log"
+	"text/tabwriter"
 )
 
 func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account, gameId int, guesses int) {
@@ -68,7 +70,7 @@ func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.S
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
-func getScores(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account) {
+func getHistory(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, a wordle.Account) {
 
 	historyByAccountParams := wordle.GetScoreHistoryByAccountParams{
 		DiscordID: a.DiscordID,
@@ -89,6 +91,31 @@ func getScores(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Ses
 		for _, v := range scores {
 			response.Text += fmt.Sprintf("\n game: %d - %d/6", v.GameID, v.Guesses)
 		}
+	}
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	q := wordle.New(db)
+	scores, err := q.GetScoresByServerId(ctx, m.GuildID)
+	var response response
+
+	if err != nil {
+		response.Emoji = "⛔"
+		response.Text = "Not finding any previous scores"
+	} else {
+		response.Emoji = "🔢"
+
+		var buf bytes.Buffer
+		w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', tabwriter.AlignRight)
+
+		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
+		for _, v := range scores {
+			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, v.GuessesPerGame, v.Total))
+		}
+
+		_ = w.Flush()
+		response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
 	}
 	flushEmojiAndResponseToDiscord(s, m, response)
 }

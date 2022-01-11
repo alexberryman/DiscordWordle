@@ -31,10 +31,12 @@ var db *sql.DB
 
 const cmdHistory = "history"
 const cmdUpdate = "update"
+const cmdScoreboard = "scoreboard"
 const cmdQuip = "quip"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 const noSolutionResult = "X"
+const noSolutionGuesses = 7
 
 func init() {
 	Token = os.Getenv("DISCORD_TOKEN")
@@ -153,10 +155,12 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 		gameId, guesses := extractGameGuesses(input)
 		updateExistingScore(ctx, m, s, account, gameId, guesses)
 	} else if strings.HasPrefix(input, cmdHistory) {
-		getScores(ctx, m, s, account)
+		getHistory(ctx, m, s, account)
 	} else if strings.HasPrefix(input, cmdQuip) {
 		score, quip := extractScoreQuip(input)
 		persistQuip(ctx, m, s, account, score, quip)
+	} else if strings.HasPrefix(input, cmdScoreboard) {
+		getScoreboard(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {
@@ -180,7 +184,7 @@ func extractGameGuesses(input string) (int, int) {
 	gameId, _ := strconv.Atoi(result["game_id"])
 	var guesses int
 	if strings.ToUpper(result["guesses"]) == noSolutionResult {
-		guesses = 0
+		guesses = noSolutionGuesses
 	} else {
 		guesses, _ = strconv.Atoi(result["guesses"])
 	}

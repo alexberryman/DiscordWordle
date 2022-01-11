@@ -5,6 +5,7 @@ package wordle
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 )
 
@@ -100,6 +101,55 @@ func (q *Queries) GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHist
 			&i.DiscordID_2,
 			&i.ServerID,
 			&i.Nickname,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getScoresByServerId = `-- name: GetScoresByServerId :many
+with max_game_week as (select max(game_id/7) game_week from wordle_scores)
+select n.nickname,
+       json_agg(guesses order by s.game_id)             guesses_per_game,
+       json_agg((7 - s.guesses) ^ 2 order by s.game_id) points_per_game,
+       sum((7 - s.guesses) ^ 2)                         total
+from wordle_scores s
+         inner join nicknames n on s.discord_id = n.discord_id
+         inner join max_game_week g on g.game_week = s.game_id/7
+where server_id = $1
+group by n.nickname
+order by sum((7 - s.guesses) ^ 2) desc
+`
+
+type GetScoresByServerIdRow struct {
+	Nickname       string          `json:"nickname"`
+	GuessesPerGame json.RawMessage `json:"guesses_per_game"`
+	PointsPerGame  json.RawMessage `json:"points_per_game"`
+	Total          int64           `json:"total"`
+}
+
+func (q *Queries) GetScoresByServerId(ctx context.Context, serverID string) ([]GetScoresByServerIdRow, error) {
+	rows, err := q.query(ctx, q.getScoresByServerIdStmt, getScoresByServerId, serverID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetScoresByServerIdRow
+	for rows.Next() {
+		var i GetScoresByServerIdRow
+		if err := rows.Scan(
+			&i.Nickname,
+			&i.GuessesPerGame,
+			&i.PointsPerGame,
+			&i.Total,
 		); err != nil {
 			return nil, err
 		}
