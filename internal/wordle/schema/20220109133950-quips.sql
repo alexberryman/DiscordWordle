@@ -16,6 +16,7 @@ create table quips (
         CHECK ( quips.inside_joke_server_id != '' )
 );
 
+INSERT INTO public.accounts (discord_id, time_zone) VALUES ('229048840454406145', 'America/Chicago');
 insert into quips (score_value, quip, inside_joke, created_by_account)
     VALUES (0, 'woof 😨', false, '229048840454406145');
 insert into quips (score_value, quip, inside_joke, created_by_account)
