@@ -30,7 +30,7 @@ This project is configured to run on the free-tier of heroku. All you need is an
 1. Copy the Bot Token by clicking the `Copy` button under "Token".
 1. Use this token as the `DISCORD_TOKEN` when creating a Heroku deployment with the button below.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/alexberryman/DiscordWordle)
 
 ### Invite your own bot to a server
 1. Visit https://discordapp.com/developers/applications and select the bot application.
