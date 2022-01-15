@@ -24,6 +24,7 @@ type Querier interface {
 	GetQuipsByCreatedByAccount(ctx context.Context, createdByAccount string) ([]Quip, error)
 	GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHistoryByAccountParams) ([]GetScoreHistoryByAccountRow, error)
 	GetScoresByServerId(ctx context.Context, serverID string) ([]GetScoresByServerIdRow, error)
+	GetScoresByServerIdPreviousWeek(ctx context.Context, serverID string) ([]GetScoresByServerIdPreviousWeekRow, error)
 	ListAccounts(ctx context.Context) ([]Account, error)
 	ListNicknames(ctx context.Context) ([]Nickname, error)
 	ListScores(ctx context.Context) ([]WordleScore, error)

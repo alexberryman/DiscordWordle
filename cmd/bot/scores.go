@@ -107,7 +107,52 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		response.Emoji = "🔢"
 
 		var buf bytes.Buffer
-		w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', tabwriter.AlignRight)
+		w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
+
+		var maxNumOfGames int
+		maxNumOfGames = 0
+		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
+		for _, v := range scores {
+			if int(v.GamesCount) > maxNumOfGames {
+				maxNumOfGames = int(v.GamesCount)
+			}
+			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, v.GuessesPerGame, v.Total))
+		}
+
+		var lwBuf bytes.Buffer
+		lw := tabwriter.NewWriter(&lwBuf, 0, 0, 3, ' ', 0)
+		if maxNumOfGames == 1 {
+			lastWeekScores, _ := q.GetScoresByServerIdPreviousWeek(ctx, m.GuildID)
+			_, _ = fmt.Fprintln(lw, "Name\tGuesses\tTotal\t")
+			for _, lwv := range lastWeekScores {
+				_, _ = fmt.Fprintln(lw, fmt.Sprintf("%s\t%s\t%d\t", lwv.Nickname, lwv.GuessesPerGame, lwv.Total))
+			}
+			_ = lw.Flush()
+		}
+
+		_ = w.Flush()
+		if len(lwBuf.String()) > 0 {
+			response.Text = fmt.Sprintf("**This week:**\n```\n%s\n```\n**Last Week:**\n```\n%s\n```", buf.String(), lwBuf.String())
+		} else {
+			response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
+		}
+	}
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func getPreviousScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	q := wordle.New(db)
+	scores, err := q.GetScoresByServerIdPreviousWeek(ctx, m.GuildID)
+	var response response
+
+	if err != nil {
+		response.Emoji = "⛔"
+		response.Text = "Not finding any previous scores"
+	} else {
+		response.Emoji = "🔢"
+
+		var buf bytes.Buffer
+		w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
 
 		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
 		for _, v := range scores {
@@ -115,7 +160,8 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		}
 
 		_ = w.Flush()
-		response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
+
+		response.Text = fmt.Sprintf("**Last Week:**\n```\n%s\n```", buf.String())
 	}
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
