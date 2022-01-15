@@ -167,7 +167,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdTimeZone) {
 		updateAccountTimeZone(ctx, input, cmdTimeZone, s, m, q, account)
 	} else if strings.HasPrefix(input, "help") {
-		helpResponse(s, m, botMentionToken, cmdHistory, cmdTimeZone, cmdQuip)
+		helpResponse(s, m, botMentionToken)
 	} else {
 		r.Text = "Wut?"
 		flushEmojiAndResponseToDiscord(s, m, r)

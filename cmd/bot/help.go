@@ -5,7 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionToken string, cmdHistory string, CmdTimeZone string, cmdQuip string) {
+func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionToken string) {
 	var response response
 	response.Text = fmt.Sprintf("`%s` - register a score for the current Wordle game. Only one is score is allowed for each game.\n"+
 		"`%s` - update existing Wordle score for a game\n"+
@@ -21,7 +21,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		fmt.Sprintf("%s %s 3 the three blind mice could do better", botMentionToken, cmdQuip),
 		fmt.Sprintf("%s %s", botMentionToken, cmdScoreboard),
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdScoreboard, cmdPreviousWeek),
-		fmt.Sprintf("%s %s America/New_York", botMentionToken, CmdTimeZone),
+		fmt.Sprintf("%s %s America/New_York", botMentionToken, cmdTimeZone),
 	)
 
 	response.Emoji = "💁"
