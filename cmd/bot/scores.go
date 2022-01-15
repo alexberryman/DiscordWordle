@@ -24,6 +24,7 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	_, err := q.CreateScore(ctx, scoreParams)
 
 	if err != nil {
+		log.Println(err)
 		response.Emoji = "⛔"
 		response.Text = "You already created a price for this game, try updating it if it's wrong"
 	} else {
@@ -208,7 +209,7 @@ func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.Messag
 }
 
 func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCreate, response response) response {
-	if guesses >= 0 && guesses <= 6 {
+	if guesses >= 1 && guesses <= 6 || guesses == noSolutionGuesses {
 		responseParams := wordle.GetQuipByScoreParams{
 			ScoreValue:         int32(guesses),
 			InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
@@ -229,7 +230,7 @@ func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCr
 func selectResponseEmoji(guesses int, response response) response {
 	if guesses == 69 {
 		response.Emoji = "♋️"
-	} else if guesses == 0 {
+	} else if guesses == noSolutionGuesses {
 		response.Emoji = "0️⃣"
 	} else if guesses == 1 {
 		response.Emoji = "1️⃣"
