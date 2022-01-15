@@ -120,7 +120,7 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		}
 
 		var lwBuf bytes.Buffer
-		lw := tabwriter.NewWriter(&lwBuf, 0, 0, 3, ' ', tabwriter.AlignRight)
+		lw := tabwriter.NewWriter(&lwBuf, 0, 0, 3, ' ', 0)
 		if maxNumOfGames == 1 {
 			lastWeekScores, _ := q.GetScoresByServerIdLastWeek(ctx, m.GuildID)
 			_, _ = fmt.Fprintln(lw, "Name\tGuesses\tTotal\t")
