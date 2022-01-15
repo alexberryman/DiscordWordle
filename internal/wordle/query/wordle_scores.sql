@@ -51,7 +51,7 @@ where n.server_id = $1
 group by n.nickname
 order by sum((7 - s.guesses) ^ 2) desc;
 
--- name: GetScoresByServerIdLastWeek :many
+-- name: GetScoresByServerIdPreviousWeek :many
 with max_game_week as (select (max(game_id / 7)) - 1 game_week
                        from wordle_scores
                                 inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id

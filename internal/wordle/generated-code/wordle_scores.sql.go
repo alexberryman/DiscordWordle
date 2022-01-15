@@ -171,7 +171,7 @@ func (q *Queries) GetScoresByServerId(ctx context.Context, serverID string) ([]G
 	return items, nil
 }
 
-const getScoresByServerIdLastWeek = `-- name: GetScoresByServerIdLastWeek :many
+const getScoresByServerIdPreviousWeek = `-- name: GetScoresByServerIdPreviousWeek :many
 with max_game_week as (select (max(game_id / 7)) - 1 game_week
                        from wordle_scores
                                 inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
@@ -190,7 +190,7 @@ group by n.nickname
 order by sum((7 - s.guesses) ^ 2) desc
 `
 
-type GetScoresByServerIdLastWeekRow struct {
+type GetScoresByServerIdPreviousWeekRow struct {
 	Nickname       string          `json:"nickname"`
 	GuessesPerGame json.RawMessage `json:"guesses_per_game"`
 	PointsPerGame  json.RawMessage `json:"points_per_game"`
@@ -198,15 +198,15 @@ type GetScoresByServerIdLastWeekRow struct {
 	Total          int64           `json:"total"`
 }
 
-func (q *Queries) GetScoresByServerIdLastWeek(ctx context.Context, serverID string) ([]GetScoresByServerIdLastWeekRow, error) {
-	rows, err := q.query(ctx, q.getScoresByServerIdLastWeekStmt, getScoresByServerIdLastWeek, serverID)
+func (q *Queries) GetScoresByServerIdPreviousWeek(ctx context.Context, serverID string) ([]GetScoresByServerIdPreviousWeekRow, error) {
+	rows, err := q.query(ctx, q.getScoresByServerIdPreviousWeekStmt, getScoresByServerIdPreviousWeek, serverID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetScoresByServerIdLastWeekRow
+	var items []GetScoresByServerIdPreviousWeekRow
 	for rows.Next() {
-		var i GetScoresByServerIdLastWeekRow
+		var i GetScoresByServerIdPreviousWeekRow
 		if err := rows.Scan(
 			&i.Nickname,
 			&i.GuessesPerGame,

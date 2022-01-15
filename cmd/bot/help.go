@@ -12,6 +12,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		"`%s` - get your past Wordle scores\n"+
 		"`%s` - Add your own sass for the bot to use as a reply for a specific number\n"+
 		"`%s` - view the scoreboard of you and your friends\n"+
+		"`%s` - view last week's (game number/7) scoreboard\n"+
 		"`%s` - set your local timezone <https://en.wikipedia.org/wiki/List_of_tz_database_time_zones>\n"+
 		"Report issue or help improve this bot at <https://github.com/alexberryman/DiscordWordle>\n",
 		fmt.Sprintf("%s %s 204 5/6 <emoji blocks>", botMentionToken, cmdWordle),
@@ -19,6 +20,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		fmt.Sprintf("%s %s", botMentionToken, cmdHistory),
 		fmt.Sprintf("%s %s 3 the three blind mice could do better", botMentionToken, cmdQuip),
 		fmt.Sprintf("%s %s", botMentionToken, cmdScoreboard),
+		fmt.Sprintf("%s %s %s", botMentionToken, cmdScoreboard, cmdPreviousWeek),
 		fmt.Sprintf("%s %s America/New_York", botMentionToken, CmdTimeZone),
 	)
 

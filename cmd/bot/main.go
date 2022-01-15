@@ -32,6 +32,7 @@ var db *sql.DB
 const cmdHistory = "history"
 const cmdUpdate = "update"
 const cmdScoreboard = "scoreboard"
+const cmdPreviousWeek = "previous"
 const cmdQuip = "quip"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
@@ -159,6 +160,8 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdQuip) {
 		score, quip := extractScoreQuip(input)
 		persistQuip(ctx, m, s, account, score, quip)
+	} else if strings.HasPrefix(input, cmdScoreboard+" "+cmdPreviousWeek) {
+		getPreviousScoreboard(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdScoreboard) {
 		getScoreboard(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdTimeZone) {
