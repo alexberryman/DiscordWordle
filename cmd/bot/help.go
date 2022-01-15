@@ -18,7 +18,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		fmt.Sprintf("%s %s 204 5/6 <emoji blocks>", botMentionToken, cmdWordle),
 		fmt.Sprintf("%s %s 204 2/6", botMentionToken, cmdUpdate),
 		fmt.Sprintf("%s %s", botMentionToken, cmdHistory),
-		fmt.Sprintf("%s %s 3 the three blind mice could do better", botMentionToken, cmdQuip),
+		fmt.Sprintf("%s %s 3 Wow, you seem really smart!", botMentionToken, cmdQuip),
 		fmt.Sprintf("%s %s", botMentionToken, cmdScoreboard),
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdScoreboard, cmdPreviousWeek),
 		fmt.Sprintf("%s %s America/New_York", botMentionToken, cmdTimeZone),
