@@ -10,7 +10,7 @@ import (
 
 const createQuipForScore = `-- name: CreateQuipForScore :one
 insert into quips (score_value, quip, inside_joke, inside_joke_server_id, created_by_account)
-VALUES ($1, $2, $3, $4, $5) returning id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at
+VALUES ($1, $2, $3, $4, $5) returning id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at, uses
 `
 
 type CreateQuipForScoreParams struct {
@@ -38,16 +38,17 @@ func (q *Queries) CreateQuipForScore(ctx context.Context, arg CreateQuipForScore
 		&i.InsideJokeServerID,
 		&i.CreatedByAccount,
 		&i.CreatedAt,
+		&i.Uses,
 	)
 	return i, err
 }
 
 const getQuipByScore = `-- name: GetQuipByScore :one
-SELECT id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at
+SELECT id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at, uses
 FROM quips
 where score_value = $1
   and (not inside_joke or (inside_joke and inside_joke_server_id = $2))
-ORDER BY random()
+ORDER BY uses,random()
 LIMIT 1
 `
 
@@ -67,12 +68,13 @@ func (q *Queries) GetQuipByScore(ctx context.Context, arg GetQuipByScoreParams) 
 		&i.InsideJokeServerID,
 		&i.CreatedByAccount,
 		&i.CreatedAt,
+		&i.Uses,
 	)
 	return i, err
 }
 
 const getQuipsByCreatedByAccount = `-- name: GetQuipsByCreatedByAccount :many
-SELECT id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at
+SELECT id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at, uses
 FROM quips
 where created_by_account = $1
 `
@@ -94,6 +96,7 @@ func (q *Queries) GetQuipsByCreatedByAccount(ctx context.Context, createdByAccou
 			&i.InsideJokeServerID,
 			&i.CreatedByAccount,
 			&i.CreatedAt,
+			&i.Uses,
 		); err != nil {
 			return nil, err
 		}
@@ -106,4 +109,15 @@ func (q *Queries) GetQuipsByCreatedByAccount(ctx context.Context, createdByAccou
 		return nil, err
 	}
 	return items, nil
+}
+
+const incrementQuip = `-- name: IncrementQuip :exec
+UPDATE quips
+SET uses = uses + 1
+WHERE id = $1
+`
+
+func (q *Queries) IncrementQuip(ctx context.Context, id int64) error {
+	_, err := q.exec(ctx, q.incrementQuipStmt, incrementQuip, id)
+	return err
 }

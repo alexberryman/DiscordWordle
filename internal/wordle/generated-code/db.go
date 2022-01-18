@@ -76,6 +76,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getScoresByServerIdPreviousWeekStmt, err = db.PrepareContext(ctx, getScoresByServerIdPreviousWeek); err != nil {
 		return nil, fmt.Errorf("error preparing query GetScoresByServerIdPreviousWeek: %w", err)
 	}
+	if q.incrementQuipStmt, err = db.PrepareContext(ctx, incrementQuip); err != nil {
+		return nil, fmt.Errorf("error preparing query IncrementQuip: %w", err)
+	}
 	if q.listAccountsStmt, err = db.PrepareContext(ctx, listAccounts); err != nil {
 		return nil, fmt.Errorf("error preparing query ListAccounts: %w", err)
 	}
@@ -189,6 +192,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getScoresByServerIdPreviousWeekStmt: %w", cerr)
 		}
 	}
+	if q.incrementQuipStmt != nil {
+		if cerr := q.incrementQuipStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing incrementQuipStmt: %w", cerr)
+		}
+	}
 	if q.listAccountsStmt != nil {
 		if cerr := q.listAccountsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing listAccountsStmt: %w", cerr)
@@ -276,6 +284,7 @@ type Queries struct {
 	getScoreHistoryByAccountStmt            *sql.Stmt
 	getScoresByServerIdStmt                 *sql.Stmt
 	getScoresByServerIdPreviousWeekStmt     *sql.Stmt
+	incrementQuipStmt                       *sql.Stmt
 	listAccountsStmt                        *sql.Stmt
 	listNicknamesStmt                       *sql.Stmt
 	listScoresStmt                          *sql.Stmt
@@ -306,6 +315,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getScoreHistoryByAccountStmt:            q.getScoreHistoryByAccountStmt,
 		getScoresByServerIdStmt:                 q.getScoresByServerIdStmt,
 		getScoresByServerIdPreviousWeekStmt:     q.getScoresByServerIdPreviousWeekStmt,
+		incrementQuipStmt:                       q.incrementQuipStmt,
 		listAccountsStmt:                        q.listAccountsStmt,
 		listNicknamesStmt:                       q.listNicknamesStmt,
 		listScoresStmt:                          q.listScoresStmt,
