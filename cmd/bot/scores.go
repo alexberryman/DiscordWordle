@@ -217,6 +217,7 @@ func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCr
 
 		q := wordle.New(db)
 		r, _ := q.GetQuipByScore(ctx, responseParams)
+		q.IncrementQuip(ctx, r.ID)
 		response.Text = r.Quip
 	} else if guesses == 69 {
 		response.Text = "nice."

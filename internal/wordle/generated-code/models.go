@@ -26,6 +26,7 @@ type Quip struct {
 	InsideJokeServerID sql.NullString `json:"inside_joke_server_id"`
 	CreatedByAccount   string         `json:"created_by_account"`
 	CreatedAt          time.Time      `json:"created_at"`
+	Uses               int32          `json:"uses"`
 }
 
 type WordleScore struct {
