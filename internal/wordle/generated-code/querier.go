@@ -7,6 +7,7 @@ import (
 )
 
 type Querier interface {
+	CheckIfServerHasDisabledQuips(ctx context.Context, serverID string) (string, error)
 	CountAccountsByDiscordId(ctx context.Context, discordID string) (int64, error)
 	CountNicknameByDiscordIdAndServerId(ctx context.Context, arg CountNicknameByDiscordIdAndServerIdParams) (int64, error)
 	CountScoresByDiscordId(ctx context.Context, discordID string) (int64, error)
@@ -17,6 +18,8 @@ type Querier interface {
 	DeleteAccount(ctx context.Context, discordID string) error
 	DeleteNickname(ctx context.Context, discordID string) error
 	DeleteScoresForUser(ctx context.Context, discordID string) error
+	DisableQuipsForServer(ctx context.Context, serverID string) error
+	EnableQuipsForServer(ctx context.Context, serverID string) error
 	GetAccount(ctx context.Context, discordID string) (Account, error)
 	GetNickname(ctx context.Context, arg GetNicknameParams) (Nickname, error)
 	GetNicknamesByDiscordId(ctx context.Context, discordID string) ([]Nickname, error)
