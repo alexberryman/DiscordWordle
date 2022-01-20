@@ -105,7 +105,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	botMentionToken := fmt.Sprintf("@%s", botName)
-	if strings.HasPrefix(tokenizedContent, botMentionToken) {
+	wordleScoreDetected, err := mentionlessWordleScoreDetection(tokenizedContent)
+	if strings.HasPrefix(tokenizedContent, botMentionToken) || wordleScoreDetected {
 		input := strings.TrimSpace(strings.Replace(tokenizedContent, botMentionToken, "", 1))
 		q := wordle.New(db)
 		ctx := context.Background()
@@ -218,6 +219,16 @@ func extractGameGuesses(input string) (int, int, error) {
 		guesses, _ = strconv.Atoi(result["guesses"])
 	}
 	return gameId, guesses, nil
+}
+
+func mentionlessWordleScoreDetection(input string) (bool, error) {
+	var dataExp = regexp.MustCompile(fmt.Sprintf(`Wordle (?P<game_id>\d+)\s(?P<guesses>\d+|%s)/6\n`, noSolutionResult))
+	result, err := matchGroupsToStringMap(input, dataExp)
+	if err != nil {
+		return false, err
+	}
+
+	return len(result) > 0, nil
 }
 
 func matchGroupsToStringMap(input string, dataExp *regexp.Regexp) (map[string]string, error) {
