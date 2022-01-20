@@ -4,7 +4,7 @@ import (
 	"DiscordWordle/internal/wordle/generated-code"
 	"context"
 	"github.com/bwmarrin/discordgo"
-	"log"
+	"github.com/rs/zerolog/log"
 	"strings"
 	"time"
 )
@@ -62,7 +62,7 @@ func getOrCreateAccount(ctx context.Context, s *discordgo.Session, m *discordgo.
 				ServerID:  m.GuildID,
 			})
 			if err != nil {
-				log.Println("Failed to update nickname")
+				log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to update nickname")
 			} else {
 				reactToMessage(s, m, "🔁")
 			}
