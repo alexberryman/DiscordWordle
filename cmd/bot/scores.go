@@ -33,6 +33,42 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func enableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	err := q.EnableQuipsForServer(ctx, m.GuildID)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("{'message': 'error enabling quips', 'server_id': %s}", m.GuildID))
+		response.Text = "Error enabling quips"
+		response.Emoji = "💣"
+	}
+
+	response.Text = "Prepare to laugh to death at these mad jokes"
+	response.Emoji = "💭"
+
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func disableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	err := q.DisableQuipsForServer(ctx, m.GuildID)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("{'message': 'error disabling quips', 'server_id': %s}", m.GuildID))
+		response.Text = "Error disabling quips"
+		response.Emoji = "💣"
+	}
+
+	response.Text = "" //No response, only emoji
+	response.Emoji = "😶"
+
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, quip string) {
 	var nicknames []wordle.Nickname
 	if m.GuildID == "" {
