@@ -33,6 +33,42 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func enableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	err := q.EnableQuipsForServer(ctx, m.GuildID)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("{'message': 'error enabling quips', 'server_id': %s}", m.GuildID))
+		response.Text = "Error enabling quips"
+		response.Emoji = "💣"
+	}
+
+	response.Text = "Prepare to laugh to death at these mad jokes"
+	response.Emoji = "💭"
+
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func disableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	err := q.DisableQuipsForServer(ctx, m.GuildID)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("{'message': 'error disabling quips', 'server_id': %s}", m.GuildID))
+		response.Text = "Error disabling quips"
+		response.Emoji = "💣"
+	}
+
+	response.Text = "" //No response, only emoji
+	response.Emoji = "😶"
+
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, quip string) {
 	var nicknames []wordle.Nickname
 	if m.GuildID == "" {
@@ -203,7 +239,11 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 
 func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.MessageCreate) response {
 	var response response
-	response = selectResponseText(guesses, ctx, m, response)
+	q := wordle.New(db)
+	z, _ := q.CheckIfServerHasDisabledQuips(ctx, m.GuildID)
+	if len(z) == 0 {
+		response = selectResponseText(guesses, ctx, m, response)
+	}
 	response = selectResponseEmoji(guesses, response)
 	return response
 }
@@ -217,7 +257,7 @@ func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCr
 
 		q := wordle.New(db)
 		r, _ := q.GetQuipByScore(ctx, responseParams)
-		q.IncrementQuip(ctx, r.ID)
+		_ = q.IncrementQuip(ctx, r.ID)
 		response.Text = r.Quip
 	} else if guesses == 69 {
 		response.Text = "nice."
