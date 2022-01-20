@@ -12,10 +12,6 @@ type Account struct {
 	TimeZone  string `json:"time_zone"`
 }
 
-type DisableQuip struct {
-	ServerID string `json:"server_id"`
-}
-
 type Nickname struct {
 	DiscordID string `json:"discord_id"`
 	ServerID  string `json:"server_id"`
