@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/lib/pq"
-	"log"
+	"github.com/rs/zerolog/log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -45,17 +45,17 @@ const noSolutionGuesses = 7
 func init() {
 	Token = os.Getenv("DISCORD_TOKEN")
 	if Token == "" {
-		log.Println("DISCORD_TOKEN must be set")
+		log.Fatal().Msg("DISCORD_TOKEN must be set")
 	}
 
 	DatabaseUrl = os.Getenv("DATABASE_URL")
 	if DatabaseUrl == "" {
-		log.Println("DATABASE_URL must be set")
+		log.Fatal().Msg("DATABASE_URL must be set")
 	}
 
 	dbConnection, err := sql.Open("postgres", DatabaseUrl)
 	if err != nil {
-		log.Fatal("Cannot connect to database:", err)
+		log.Fatal().Err(err).Msgf("Cannot connect to database: %s", DatabaseUrl)
 	}
 
 	db = dbConnection
@@ -65,7 +65,7 @@ func main() {
 	// Create a new Discord session using the provided bot token.
 	dg, err := discordgo.New("Bot " + Token)
 	if err != nil {
-		log.Fatal("error creating Discord session,", err)
+		log.Fatal().Err(err).Msg("error creating Discord session")
 	}
 
 	// Register the messageCreate func as a callback for MessageCreate events.
@@ -74,11 +74,11 @@ func main() {
 	// Open a websocket connection to Discord and begin listening.
 	err = dg.Open()
 	if err != nil {
-		log.Fatal("error opening connection,", err)
+		log.Fatal().Err(err).Msg("error opening connection to discord over websocket")
 	}
 
 	// Wait here until CTRL-C or other term signal is received.
-	log.Println("Bot is now running.  Press CTRL-C to exit.")
+	log.Info().Msg("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -100,7 +100,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	tokenizedContent, err := m.ContentWithMoreMentionsReplaced(s)
 	if err != nil {
-		log.Println("Failed to replace mentions:", err)
+		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to replace mentions")
 		return
 	}
 
@@ -113,7 +113,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		r.Emoji = "❌"
 		existingAccount, err := q.CountAccountsByDiscordId(ctx, m.Author.ID)
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID)
 			r.Text = "Nice work! You broke the one thing that made people happy."
 			r.Emoji = "🔥"
 			flushEmojiAndResponseToDiscord(s, m, r)
@@ -125,7 +125,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			ServerID:  m.GuildID,
 		})
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID)
 			r.Text = "Nice work! You broke the one thing that made people happy."
 			r.Emoji = "🔥"
 			flushEmojiAndResponseToDiscord(s, m, r)
@@ -150,19 +150,19 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	var r response
 
 	if strings.Contains(input, cmdWordle) {
-		log.Println("Found a Wordle")
 		gameId, guesses, err := extractGameGuesses(input)
 		if err != nil {
-			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+			log.Error().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdWordle).Err(err).Msg("Error parsing guess count")
 		}
-		log.Println(fmt.Sprintf("%d - %d for %s", gameId, guesses, m.Author.Username))
+		log.Info().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdWordle).Int("guesses", guesses).Int("game_id", gameId).Msg("Found a Wordle")
 		persistScore(ctx, m, s, account, gameId, guesses)
 
 	} else if strings.HasPrefix(input, cmdUpdate) {
 		gameId, guesses, err := extractGameGuesses(input)
 		if err != nil {
-			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+			log.Error().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdUpdate).Err(err).Msg("Error parsing guess count")
 		}
+		log.Info().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdUpdate).Int("guesses", guesses).Int("game_id", gameId).Msg("Updated a Wordle")
 		updateExistingScore(ctx, m, s, account, gameId, guesses)
 	} else if strings.HasPrefix(input, cmdHistory) {
 		getHistory(ctx, m, s, account)
@@ -173,7 +173,7 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdQuip) {
 		score, quip, err := extractScoreQuip(input)
 		if err != nil {
-			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+			log.Error().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdQuip).Err(err).Msg("Error parsing quip")
 		}
 		persistQuip(ctx, m, s, account, score, quip)
 	} else if strings.HasPrefix(input, cmdScoreboard+" "+cmdPreviousWeek) {
@@ -185,7 +185,9 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, "help") {
 		helpResponse(s, m, botMentionToken)
 	} else {
+		log.Info().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", "").Msg("Failed to match command")
 		r.Text = "Wut?"
+		r.Emoji = "🤷"
 		flushEmojiAndResponseToDiscord(s, m, r)
 	}
 }
@@ -223,7 +225,6 @@ func matchGroupsToStringMap(input string, dataExp *regexp.Regexp) (map[string]st
 	result := make(map[string]string)
 	if len(match) == 0 {
 		errorMessage := fmt.Sprintf("%s didn't match %s", input, dataExp)
-		log.Println(errorMessage)
 		return result, errors.New(errorMessage)
 
 	}
@@ -244,14 +245,16 @@ func respondAsNewMessage(s *discordgo.Session, m *discordgo.MessageCreate, respo
 	if response != "" {
 		_, err := s.ChannelMessageSend(m.ChannelID, response)
 		if err != nil {
-			log.Println("Error responding:", err)
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Str("response", response).Msg("Error responding")
 		}
 	}
 }
 
 func reactToMessage(s *discordgo.Session, m *discordgo.MessageCreate, reactionEmoji string) {
-	err := s.MessageReactionAdd(m.ChannelID, m.Message.ID, reactionEmoji)
-	if err != nil {
-		log.Println("Error adding and emoji:", err)
+	if reactionEmoji != "" {
+		err := s.MessageReactionAdd(m.ChannelID, m.Message.ID, reactionEmoji)
+		if err != nil {
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Str("reaction", reactionEmoji).Msg("Error reacting")
+		}
 	}
 }
