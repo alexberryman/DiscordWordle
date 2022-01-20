@@ -40,6 +40,7 @@ const cmdQuipDisable = "disable"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 const noSolutionResult = "X"
+const hardModeIndicator = "*"
 const noSolutionGuesses = 7
 
 func init() {
@@ -222,7 +223,7 @@ func extractGameGuesses(input string) (int, int, error) {
 }
 
 func mentionlessWordleScoreDetection(input string) (bool, error) {
-	var dataExp = regexp.MustCompile(fmt.Sprintf(`Wordle (?P<game_id>\d+)\s(?P<guesses>\d+|%s)/6\n`, noSolutionResult))
+	var dataExp = regexp.MustCompile(fmt.Sprintf(`Wordle (?P<game_id>\d+)\s(?P<guesses>\d+|%s)/6[\%s]?\n`, noSolutionResult, hardModeIndicator))
 	result, err := matchGroupsToStringMap(input, dataExp)
 	if err != nil {
 		return false, err
