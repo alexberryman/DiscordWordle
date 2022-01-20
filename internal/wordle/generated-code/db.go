@@ -22,9 +22,6 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.checkIfServerHasDisabledQuipsStmt, err = db.PrepareContext(ctx, checkIfServerHasDisabledQuips); err != nil {
-		return nil, fmt.Errorf("error preparing query CheckIfServerHasDisabledQuips: %w", err)
-	}
 	if q.countAccountsByDiscordIdStmt, err = db.PrepareContext(ctx, countAccountsByDiscordId); err != nil {
 		return nil, fmt.Errorf("error preparing query CountAccountsByDiscordId: %w", err)
 	}
@@ -54,12 +51,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.deleteScoresForUserStmt, err = db.PrepareContext(ctx, deleteScoresForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteScoresForUser: %w", err)
-	}
-	if q.disableQuipsForServerStmt, err = db.PrepareContext(ctx, disableQuipsForServer); err != nil {
-		return nil, fmt.Errorf("error preparing query DisableQuipsForServer: %w", err)
-	}
-	if q.enableQuipsForServerStmt, err = db.PrepareContext(ctx, enableQuipsForServer); err != nil {
-		return nil, fmt.Errorf("error preparing query EnableQuipsForServer: %w", err)
 	}
 	if q.getAccountStmt, err = db.PrepareContext(ctx, getAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAccount: %w", err)
@@ -111,11 +102,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 
 func (q *Queries) Close() error {
 	var err error
-	if q.checkIfServerHasDisabledQuipsStmt != nil {
-		if cerr := q.checkIfServerHasDisabledQuipsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing checkIfServerHasDisabledQuipsStmt: %w", cerr)
-		}
-	}
 	if q.countAccountsByDiscordIdStmt != nil {
 		if cerr := q.countAccountsByDiscordIdStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing countAccountsByDiscordIdStmt: %w", cerr)
@@ -164,16 +150,6 @@ func (q *Queries) Close() error {
 	if q.deleteScoresForUserStmt != nil {
 		if cerr := q.deleteScoresForUserStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteScoresForUserStmt: %w", cerr)
-		}
-	}
-	if q.disableQuipsForServerStmt != nil {
-		if cerr := q.disableQuipsForServerStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing disableQuipsForServerStmt: %w", cerr)
-		}
-	}
-	if q.enableQuipsForServerStmt != nil {
-		if cerr := q.enableQuipsForServerStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing enableQuipsForServerStmt: %w", cerr)
 		}
 	}
 	if q.getAccountStmt != nil {
@@ -290,7 +266,6 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                                      DBTX
 	tx                                      *sql.Tx
-	checkIfServerHasDisabledQuipsStmt       *sql.Stmt
 	countAccountsByDiscordIdStmt            *sql.Stmt
 	countNicknameByDiscordIdAndServerIdStmt *sql.Stmt
 	countScoresByDiscordIdStmt              *sql.Stmt
@@ -301,8 +276,6 @@ type Queries struct {
 	deleteAccountStmt                       *sql.Stmt
 	deleteNicknameStmt                      *sql.Stmt
 	deleteScoresForUserStmt                 *sql.Stmt
-	disableQuipsForServerStmt               *sql.Stmt
-	enableQuipsForServerStmt                *sql.Stmt
 	getAccountStmt                          *sql.Stmt
 	getNicknameStmt                         *sql.Stmt
 	getNicknamesByDiscordIdStmt             *sql.Stmt
@@ -324,7 +297,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                                      tx,
 		tx:                                      tx,
-		checkIfServerHasDisabledQuipsStmt:       q.checkIfServerHasDisabledQuipsStmt,
 		countAccountsByDiscordIdStmt:            q.countAccountsByDiscordIdStmt,
 		countNicknameByDiscordIdAndServerIdStmt: q.countNicknameByDiscordIdAndServerIdStmt,
 		countScoresByDiscordIdStmt:              q.countScoresByDiscordIdStmt,
@@ -335,8 +307,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		deleteAccountStmt:                       q.deleteAccountStmt,
 		deleteNicknameStmt:                      q.deleteNicknameStmt,
 		deleteScoresForUserStmt:                 q.deleteScoresForUserStmt,
-		disableQuipsForServerStmt:               q.disableQuipsForServerStmt,
-		enableQuipsForServerStmt:                q.enableQuipsForServerStmt,
 		getAccountStmt:                          q.getAccountStmt,
 		getNicknameStmt:                         q.getNicknameStmt,
 		getNicknamesByDiscordIdStmt:             q.getNicknamesByDiscordIdStmt,
