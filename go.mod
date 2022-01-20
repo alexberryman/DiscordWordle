@@ -13,11 +13,10 @@ require (
 	github.com/go-kit/kit v0.10.0 // indirect
 	github.com/gobuffalo/envy v1.7.1 // indirect
 	github.com/lib/pq v1.10.0
+	github.com/rs/zerolog v1.26.1 // indirect
 	github.com/rubenv/sql-migrate v1.0.0
 	github.com/sirupsen/logrus v1.5.0 // indirect
 	github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
-	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 )

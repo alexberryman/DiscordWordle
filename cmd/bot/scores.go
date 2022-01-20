@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
-	"log"
+	"github.com/rs/zerolog/log"
 	"text/tabwriter"
 )
 
@@ -24,7 +24,7 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	_, err := q.CreateScore(ctx, scoreParams)
 
 	if err != nil {
-		log.Println(err)
+		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to persist score")
 		response.Emoji = "⛔"
 		response.Text = "You already created a price for this game, try updating it if it's wrong"
 	} else {
@@ -40,7 +40,7 @@ func enableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.S
 	err := q.EnableQuipsForServer(ctx, m.GuildID)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("{'message': 'error enabling quips', 'server_id': %s}", m.GuildID))
+		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to enable quips")
 		response.Text = "Error enabling quips"
 		response.Emoji = "💣"
 	}
@@ -58,7 +58,7 @@ func disableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	err := q.DisableQuipsForServer(ctx, m.GuildID)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("{'message': 'error disabling quips', 'server_id': %s}", m.GuildID))
+		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to disable quips")
 		response.Text = "Error disabling quips"
 		response.Emoji = "💣"
 	}
@@ -95,7 +95,7 @@ func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.S
 		q := wordle.New(db)
 		_, err := q.CreateQuipForScore(ctx, quipParams)
 		if err != nil {
-			log.Println(err)
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to create quipe")
 			response.Emoji = "⛔"
 			response.Text = "Them words area not right"
 			flushEmojiAndResponseToDiscord(s, m, response)
