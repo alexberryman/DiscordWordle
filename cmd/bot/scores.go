@@ -239,7 +239,11 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 
 func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.MessageCreate) response {
 	var response response
-	response = selectResponseText(guesses, ctx, m, response)
+	q := wordle.New(db)
+	z, _ := q.CheckIfServerHasDisabledQuips(ctx, m.GuildID)
+	if len(z) == 0 {
+		response = selectResponseText(guesses, ctx, m, response)
+	}
 	response = selectResponseEmoji(guesses, response)
 	return response
 }
@@ -253,7 +257,7 @@ func selectResponseText(guesses int, ctx context.Context, m *discordgo.MessageCr
 
 		q := wordle.New(db)
 		r, _ := q.GetQuipByScore(ctx, responseParams)
-		q.IncrementQuip(ctx, r.ID)
+		_ = q.IncrementQuip(ctx, r.ID)
 		response.Text = r.Quip
 	} else if guesses == 69 {
 		response.Text = "nice."
