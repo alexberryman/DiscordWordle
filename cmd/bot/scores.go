@@ -26,7 +26,12 @@ func persistScore(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	if err != nil {
 		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to persist score")
 		response.Emoji = "⛔"
-		response.Text = "You already created a price for this game, try updating it if it's wrong"
+		serverHasDisabledQuips, _ := q.CheckIfServerHasDisabledQuips(ctx, m.GuildID)
+		if len(serverHasDisabledQuips) == 0 {
+			response.Text = "You already created a score for this game, try updating it if it's wrong"
+		} else {
+			response.Text = ""
+		}
 	} else {
 		response = scoreColorfulResponse(guesses, ctx, m)
 	}
@@ -96,7 +101,7 @@ func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.S
 		_, err := q.CreateQuipForScore(ctx, quipParams)
 		if err != nil {
 			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to create quipe")
-			response.Emoji = "⛔"
+			response.Emoji = "⁉️"
 			response.Text = "Them words area not right"
 			flushEmojiAndResponseToDiscord(s, m, response)
 			return
@@ -120,7 +125,7 @@ func getHistory(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Se
 	var response response
 
 	if err != nil {
-		response.Emoji = "⛔"
+		response.Emoji = "⁉️"
 		response.Text = "Not finding any previous scores"
 	} else {
 		response.Emoji = "👍"
@@ -138,7 +143,7 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 	var response response
 
 	if err != nil {
-		response.Emoji = "⛔"
+		response.Emoji = "⁉️"
 		response.Text = "Not finding any previous scores"
 	} else {
 		response.Emoji = "🔢"
@@ -183,7 +188,7 @@ func getPreviousScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *d
 	var response response
 
 	if err != nil {
-		response.Emoji = "⛔"
+		response.Emoji = "⁉️"
 		response.Text = "Not finding any previous scores"
 	} else {
 		response.Emoji = "🔢"
@@ -216,7 +221,7 @@ func updateExistingScore(ctx context.Context, m *discordgo.MessageCreate, s *dis
 	_, err := q.UpdateScore(ctx, priceParams)
 
 	if err != nil {
-		response.Emoji = "⛔"
+		response.Emoji = "⁉️"
 		response.Text = "I didn't find an existing price."
 	} else {
 		response = scoreColorfulResponse(guesses, ctx, m)
@@ -240,8 +245,8 @@ func buildScoreObjFromInput(a wordle.Account, gameId int, guesses int) (response
 func scoreColorfulResponse(guesses int, ctx context.Context, m *discordgo.MessageCreate) response {
 	var response response
 	q := wordle.New(db)
-	z, _ := q.CheckIfServerHasDisabledQuips(ctx, m.GuildID)
-	if len(z) == 0 {
+	serverHasDisabledQuips, _ := q.CheckIfServerHasDisabledQuips(ctx, m.GuildID)
+	if len(serverHasDisabledQuips) == 0 {
 		response = selectResponseText(guesses, ctx, m, response)
 	}
 	response = selectResponseEmoji(guesses, response)
