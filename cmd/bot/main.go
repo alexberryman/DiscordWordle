@@ -4,6 +4,7 @@ import (
 	"DiscordWordle/internal/wordle/generated-code"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	_ "github.com/lib/pq"
@@ -150,12 +151,18 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 
 	if strings.Contains(input, cmdWordle) {
 		log.Println("Found a Wordle")
-		gameId, guesses := extractGameGuesses(input)
+		gameId, guesses, err := extractGameGuesses(input)
+		if err != nil {
+			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+		}
 		log.Println(fmt.Sprintf("%d - %d for %s", gameId, guesses, m.Author.Username))
 		persistScore(ctx, m, s, account, gameId, guesses)
 
 	} else if strings.HasPrefix(input, cmdUpdate) {
-		gameId, guesses := extractGameGuesses(input)
+		gameId, guesses, err := extractGameGuesses(input)
+		if err != nil {
+			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+		}
 		updateExistingScore(ctx, m, s, account, gameId, guesses)
 	} else if strings.HasPrefix(input, cmdHistory) {
 		getHistory(ctx, m, s, account)
@@ -164,7 +171,10 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipDisable) {
 		disableQuips(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdQuip) {
-		score, quip := extractScoreQuip(input)
+		score, quip, err := extractScoreQuip(input)
+		if err != nil {
+			log.Println(fmt.Sprintf("%s - %s for %s on %s", err, input, m.Author.Username, m.GuildID))
+		}
 		persistQuip(ctx, m, s, account, score, quip)
 	} else if strings.HasPrefix(input, cmdScoreboard+" "+cmdPreviousWeek) {
 		getPreviousScoreboard(ctx, m, s)
@@ -180,16 +190,24 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 	}
 }
 
-func extractScoreQuip(input string) (int, string) {
+func extractScoreQuip(input string) (int, string, error) {
 	var dataExp = regexp.MustCompile(`(?P<score>\d+)\s(?P<quip>.+)`)
-	result := matchGroupsToStringMap(input, dataExp)
+
+	result, err := matchGroupsToStringMap(input, dataExp)
+	if err != nil {
+		return 0, "", err
+	}
+
 	score, _ := strconv.Atoi(result["score"])
-	return score, result["quip"]
+	return score, result["quip"], nil
 }
 
-func extractGameGuesses(input string) (int, int) {
+func extractGameGuesses(input string) (int, int, error) {
 	var dataExp = regexp.MustCompile(fmt.Sprintf(`(?P<game_id>\d+)\s(?P<guesses>\d+|%s)`, noSolutionResult))
-	result := matchGroupsToStringMap(input, dataExp)
+	result, err := matchGroupsToStringMap(input, dataExp)
+	if err != nil {
+		return 0, 0, err
+	}
 	gameId, _ := strconv.Atoi(result["game_id"])
 	var guesses int
 	if strings.ToUpper(result["guesses"]) == noSolutionResult {
@@ -197,21 +215,24 @@ func extractGameGuesses(input string) (int, int) {
 	} else {
 		guesses, _ = strconv.Atoi(result["guesses"])
 	}
-	return gameId, guesses
+	return gameId, guesses, nil
 }
 
-func matchGroupsToStringMap(input string, dataExp *regexp.Regexp) map[string]string {
+func matchGroupsToStringMap(input string, dataExp *regexp.Regexp) (map[string]string, error) {
 	match := dataExp.FindStringSubmatch(input)
-	if len(match) == 0 {
-		log.Println(fmt.Sprintf("%s didn't match %s", input, dataExp))
-	}
 	result := make(map[string]string)
+	if len(match) == 0 {
+		errorMessage := fmt.Sprintf("%s didn't match %s", input, dataExp)
+		log.Println(errorMessage)
+		return result, errors.New(errorMessage)
+
+	}
 	for i, name := range dataExp.SubexpNames() {
 		if i != 0 && name != "" {
 			result[name] = match[i]
 		}
 	}
-	return result
+	return result, nil
 }
 
 func flushEmojiAndResponseToDiscord(s *discordgo.Session, m *discordgo.MessageCreate, r response) {
