@@ -1,6 +1,7 @@
 # DiscordWordle
 [![Go Report Card](https://goreportcard.com/badge/github.com/alexberryman/DiscordWordle)](https://goreportcard.com/report/github.com/alexberryman/DiscordWordle)
 [![Actions Status](https://github.com/alexberryman/DiscordWordle/workflows/Go/badge.svg)](https://github.com/alexberryman/DiscordWordle/actions)
+[![Join Discord](https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat)](https://discord.gg/PcZ74rBsTE)
 
 A bot for discord to store and track Wordle scores.
 
@@ -19,6 +20,10 @@ This bot requests the following permissions:
 - Read Message History
 - Mention Everyone
 - Add Reactions
+
+## Get Help
+- Ask for help in Discord: [![Join Discord](https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat)](https://discord.gg/PcZ74rBsTE)
+- Open an issue on GitHub: https://github.com/alexberryman/DiscordWordle/issues
 
 ## Deploy your own bot
 This project is configured to run on the free-tier of heroku. All you need is an application token from Discord.
