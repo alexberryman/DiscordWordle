@@ -30,8 +30,8 @@ The bot may store the information automatically when being invited to a new Disc
 - `discord_id` to relate data to a specific Discord User
 - `nicknames` to display the Discord User's preferred name in the context of the server on the Wordle `scoreboard`
 - `time_zone` to allow the bot to determine the local date/time for a Discord User
-- `quip` user-generated content that the bot will use to responde to specific Wordle scores
-- `quips.uses` count of how many times a `quip` has been used in-order to increase the variety of responses 
+- `quip` user-generated content that the bot will use to respond to specific Wordle scores
+- `quips.uses` count of how many times a `quip` has been used in order to increase the variety of responses 
 - `wordle_scores.game_id` the game number shared when a Discord User posts a Wordle Score block
 - `wordle_scores.guesses` the number of guesses taken to solve the Wordle puzzle shared when a Discord User posts a Wordle Score block
 
