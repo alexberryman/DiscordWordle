@@ -216,6 +216,7 @@ func dashDisplayForMissingScores(expectedGames []int32, v wordle.GetScoresByServ
 func getPreviousScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
 	q := wordle.New(db)
 	scores, err := q.GetScoresByServerIdPreviousWeek(ctx, m.GuildID)
+	lastWeekExpectedGames, _ := q.GetExpectedPreviousWeekGames(ctx, m.GuildID)
 	var response response
 
 	if err != nil {
@@ -229,7 +230,8 @@ func getPreviousScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *d
 
 		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
 		for _, v := range scores {
-			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, v.GuessesPerGame, v.Total))
+			displayGameGuesses := dashDisplayForMissingScores(lastWeekExpectedGames, wordle.GetScoresByServerIdRow(v))
+			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, displayGameGuesses, v.Total))
 		}
 
 		_ = w.Flush()
