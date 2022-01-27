@@ -58,6 +58,80 @@ func (q *Queries) DeleteScoresForUser(ctx context.Context, discordID string) err
 	return err
 }
 
+const getExpectedPreviousWeekGames = `-- name: GetExpectedPreviousWeekGames :many
+with max_game_week as (select max(game_id / 7) -1 game_week
+                       from wordle_scores
+                                inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                       where n2.server_id = $1
+),
+     current_week_games as (select distinct game_id
+                            from wordle_scores
+                                     inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                                     inner join max_game_week on game_week = game_id / 7
+                            where n2.server_id = $1)
+select game_id from current_week_games
+`
+
+func (q *Queries) GetExpectedPreviousWeekGames(ctx context.Context, serverID string) ([]int32, error) {
+	rows, err := q.query(ctx, q.getExpectedPreviousWeekGamesStmt, getExpectedPreviousWeekGames, serverID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var game_id int32
+		if err := rows.Scan(&game_id); err != nil {
+			return nil, err
+		}
+		items = append(items, game_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getExpectedWeekGames = `-- name: GetExpectedWeekGames :many
+with max_game_week as (select max(game_id / 7) game_week
+                       from wordle_scores
+                                inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                       where n2.server_id = $1
+),
+     current_week_games as (select distinct game_id
+                            from wordle_scores
+                                     inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                                     inner join max_game_week on game_week = game_id / 7
+                            where n2.server_id = $1)
+select game_id from current_week_games
+`
+
+func (q *Queries) GetExpectedWeekGames(ctx context.Context, serverID string) ([]int32, error) {
+	rows, err := q.query(ctx, q.getExpectedWeekGamesStmt, getExpectedWeekGames, serverID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int32
+	for rows.Next() {
+		var game_id int32
+		if err := rows.Scan(&game_id); err != nil {
+			return nil, err
+		}
+		items = append(items, game_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getScoreHistoryByAccount = `-- name: GetScoreHistoryByAccount :many
 SELECT id, wordle_scores.discord_id, game_id, guesses, created_at, nick.discord_id, server_id, nickname
 FROM wordle_scores
@@ -123,6 +197,7 @@ with max_game_week as (select max(game_id / 7) game_week
 )
 select n.nickname,
        json_agg(guesses order by s.game_id)             guesses_per_game,
+       json_agg(json_build_object(game_id, guesses) order by s.game_id) game_guesses,
        json_agg((7 - s.guesses) ^ 2 order by s.game_id) points_per_game,
        count(distinct game_id)                          games_count,
        sum((7 - s.guesses) ^ 2)                         total
@@ -137,6 +212,7 @@ order by sum((7 - s.guesses) ^ 2) desc
 type GetScoresByServerIdRow struct {
 	Nickname       string          `json:"nickname"`
 	GuessesPerGame json.RawMessage `json:"guesses_per_game"`
+	GameGuesses    json.RawMessage `json:"game_guesses"`
 	PointsPerGame  json.RawMessage `json:"points_per_game"`
 	GamesCount     int64           `json:"games_count"`
 	Total          int64           `json:"total"`
@@ -154,6 +230,7 @@ func (q *Queries) GetScoresByServerId(ctx context.Context, serverID string) ([]G
 		if err := rows.Scan(
 			&i.Nickname,
 			&i.GuessesPerGame,
+			&i.GameGuesses,
 			&i.PointsPerGame,
 			&i.GamesCount,
 			&i.Total,
@@ -179,6 +256,7 @@ with max_game_week as (select (max(game_id / 7)) - 1 game_week
 )
 select n.nickname,
        json_agg(guesses order by s.game_id)             guesses_per_game,
+       json_agg(json_build_object(game_id, guesses) order by s.game_id) game_guesses,
        json_agg((7 - s.guesses) ^ 2 order by s.game_id) points_per_game,
        count(distinct game_id)                          games_count,
        sum((7 - s.guesses) ^ 2)                         total
@@ -193,6 +271,7 @@ order by sum((7 - s.guesses) ^ 2) desc
 type GetScoresByServerIdPreviousWeekRow struct {
 	Nickname       string          `json:"nickname"`
 	GuessesPerGame json.RawMessage `json:"guesses_per_game"`
+	GameGuesses    json.RawMessage `json:"game_guesses"`
 	PointsPerGame  json.RawMessage `json:"points_per_game"`
 	GamesCount     int64           `json:"games_count"`
 	Total          int64           `json:"total"`
@@ -210,6 +289,7 @@ func (q *Queries) GetScoresByServerIdPreviousWeek(ctx context.Context, serverID 
 		if err := rows.Scan(
 			&i.Nickname,
 			&i.GuessesPerGame,
+			&i.GameGuesses,
 			&i.PointsPerGame,
 			&i.GamesCount,
 			&i.Total,

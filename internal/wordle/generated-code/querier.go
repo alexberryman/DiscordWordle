@@ -21,6 +21,8 @@ type Querier interface {
 	DisableQuipsForServer(ctx context.Context, serverID string) error
 	EnableQuipsForServer(ctx context.Context, serverID string) error
 	GetAccount(ctx context.Context, discordID string) (Account, error)
+	GetExpectedPreviousWeekGames(ctx context.Context, serverID string) ([]int32, error)
+	GetExpectedWeekGames(ctx context.Context, serverID string) ([]int32, error)
 	GetNickname(ctx context.Context, arg GetNicknameParams) (Nickname, error)
 	GetNicknamesByDiscordId(ctx context.Context, discordID string) ([]Nickname, error)
 	GetQuipByScore(ctx context.Context, arg GetQuipByScoreParams) (Quip, error)

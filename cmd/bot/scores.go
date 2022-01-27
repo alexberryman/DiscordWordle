@@ -5,9 +5,11 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog/log"
+	"strconv"
 	"text/tabwriter"
 )
 
@@ -140,6 +142,8 @@ func getHistory(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Se
 func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
 	q := wordle.New(db)
 	scores, err := q.GetScoresByServerId(ctx, m.GuildID)
+	expectedGames, _ := q.GetExpectedWeekGames(ctx, m.GuildID)
+
 	var response response
 
 	if err != nil {
@@ -155,10 +159,30 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		maxNumOfGames = 0
 		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
 		for _, v := range scores {
+
+			var displayGameGuesses []string
+			for _, g := range expectedGames {
+				var nestedGameGuessesMap []map[string]int
+				cleanGameGuesses := make(map[int]int)
+				_ = json.Unmarshal(v.GameGuesses, &nestedGameGuessesMap)
+				for _, gameGuess := range nestedGameGuessesMap {
+					for stringGameId, guesses := range gameGuess {
+						gameId, _ := strconv.Atoi(stringGameId)
+						cleanGameGuesses[gameId] = guesses
+					}
+				}
+
+				if val, ok := cleanGameGuesses[int(g)]; ok {
+					displayGameGuesses = append(displayGameGuesses, strconv.Itoa(val))
+				} else {
+					displayGameGuesses = append(displayGameGuesses, "-")
+				}
+			}
+
 			if int(v.GamesCount) > maxNumOfGames {
 				maxNumOfGames = int(v.GamesCount)
 			}
-			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, v.GuessesPerGame, v.Total))
+			_, _ = fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%d\t", v.Nickname, displayGameGuesses, v.Total))
 		}
 
 		var lwBuf bytes.Buffer
