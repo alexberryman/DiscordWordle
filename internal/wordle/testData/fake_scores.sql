@@ -13,6 +13,7 @@ VALUES ('1', '934007495737884712', '1'),
        ('4', '934007495737884712', '4'),
        ('5', '934007495737884712', '5'),
        ('6', '934007495737884712', '6');
+-- Week 129
 insert into wordle_scores (discord_id, game_id, guesses)
 VALUES ('1', 903, 1),
        ('1', 904, 1),
@@ -41,4 +42,11 @@ VALUES ('5', 907, 5),
 insert into wordle_scores (discord_id, game_id, guesses)
 VALUES ('6', 908, 6);
 
+-- Week 129
+insert into wordle_scores (discord_id, game_id, guesses)
+VALUES ('6', 910, 6);
+insert into wordle_scores (discord_id, game_id, guesses)
+VALUES ('1', 910, 1),
+       ('1', 911, 1);
+delete from wordle_scores where game_id = 911;
 commit;

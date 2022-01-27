@@ -160,24 +160,7 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		_, _ = fmt.Fprintln(w, "Name\tGuesses\tTotal\t")
 		for _, v := range scores {
 
-			var displayGameGuesses []string
-			for _, g := range expectedGames {
-				var nestedGameGuessesMap []map[string]int
-				cleanGameGuesses := make(map[int]int)
-				_ = json.Unmarshal(v.GameGuesses, &nestedGameGuessesMap)
-				for _, gameGuess := range nestedGameGuessesMap {
-					for stringGameId, guesses := range gameGuess {
-						gameId, _ := strconv.Atoi(stringGameId)
-						cleanGameGuesses[gameId] = guesses
-					}
-				}
-
-				if val, ok := cleanGameGuesses[int(g)]; ok {
-					displayGameGuesses = append(displayGameGuesses, strconv.Itoa(val))
-				} else {
-					displayGameGuesses = append(displayGameGuesses, "-")
-				}
-			}
+			displayGameGuesses := dashDisplayForMissingScores(expectedGames, v)
 
 			if int(v.GamesCount) > maxNumOfGames {
 				maxNumOfGames = int(v.GamesCount)
@@ -189,9 +172,11 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		lw := tabwriter.NewWriter(&lwBuf, 0, 0, 3, ' ', 0)
 		if maxNumOfGames == 1 {
 			lastWeekScores, _ := q.GetScoresByServerIdPreviousWeek(ctx, m.GuildID)
+			lastWeekExpectedGames, _ := q.GetExpectedPreviousWeekGames(ctx, m.GuildID)
 			_, _ = fmt.Fprintln(lw, "Name\tGuesses\tTotal\t")
 			for _, lwv := range lastWeekScores {
-				_, _ = fmt.Fprintln(lw, fmt.Sprintf("%s\t%s\t%d\t", lwv.Nickname, lwv.GuessesPerGame, lwv.Total))
+				displayGameGuesses := dashDisplayForMissingScores(lastWeekExpectedGames, wordle.GetScoresByServerIdRow(lwv))
+				_, _ = fmt.Fprintln(lw, fmt.Sprintf("%s\t%s\t%d\t", lwv.Nickname, displayGameGuesses, lwv.Total))
 			}
 			_ = lw.Flush()
 		}
@@ -204,6 +189,28 @@ func getScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo
 		}
 	}
 	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func dashDisplayForMissingScores(expectedGames []int32, v wordle.GetScoresByServerIdRow) []string {
+	var displayGameGuesses []string
+	for _, g := range expectedGames {
+		var nestedGameGuessesMap []map[string]int
+		cleanGameGuesses := make(map[int]int)
+		_ = json.Unmarshal(v.GameGuesses, &nestedGameGuessesMap)
+		for _, gameGuess := range nestedGameGuessesMap {
+			for stringGameId, guesses := range gameGuess {
+				gameId, _ := strconv.Atoi(stringGameId)
+				cleanGameGuesses[gameId] = guesses
+			}
+		}
+
+		if val, ok := cleanGameGuesses[int(g)]; ok {
+			displayGameGuesses = append(displayGameGuesses, strconv.Itoa(val))
+		} else {
+			displayGameGuesses = append(displayGameGuesses, "-")
+		}
+	}
+	return displayGameGuesses
 }
 
 func getPreviousScoreboard(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
