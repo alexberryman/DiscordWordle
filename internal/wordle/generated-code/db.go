@@ -64,6 +64,12 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getAccountStmt, err = db.PrepareContext(ctx, getAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetAccount: %w", err)
 	}
+	if q.getExpectedPreviousWeekGamesStmt, err = db.PrepareContext(ctx, getExpectedPreviousWeekGames); err != nil {
+		return nil, fmt.Errorf("error preparing query GetExpectedPreviousWeekGames: %w", err)
+	}
+	if q.getExpectedWeekGamesStmt, err = db.PrepareContext(ctx, getExpectedWeekGames); err != nil {
+		return nil, fmt.Errorf("error preparing query GetExpectedWeekGames: %w", err)
+	}
 	if q.getNicknameStmt, err = db.PrepareContext(ctx, getNickname); err != nil {
 		return nil, fmt.Errorf("error preparing query GetNickname: %w", err)
 	}
@@ -179,6 +185,16 @@ func (q *Queries) Close() error {
 	if q.getAccountStmt != nil {
 		if cerr := q.getAccountStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getAccountStmt: %w", cerr)
+		}
+	}
+	if q.getExpectedPreviousWeekGamesStmt != nil {
+		if cerr := q.getExpectedPreviousWeekGamesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getExpectedPreviousWeekGamesStmt: %w", cerr)
+		}
+	}
+	if q.getExpectedWeekGamesStmt != nil {
+		if cerr := q.getExpectedWeekGamesStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getExpectedWeekGamesStmt: %w", cerr)
 		}
 	}
 	if q.getNicknameStmt != nil {
@@ -304,6 +320,8 @@ type Queries struct {
 	disableQuipsForServerStmt               *sql.Stmt
 	enableQuipsForServerStmt                *sql.Stmt
 	getAccountStmt                          *sql.Stmt
+	getExpectedPreviousWeekGamesStmt        *sql.Stmt
+	getExpectedWeekGamesStmt                *sql.Stmt
 	getNicknameStmt                         *sql.Stmt
 	getNicknamesByDiscordIdStmt             *sql.Stmt
 	getQuipByScoreStmt                      *sql.Stmt
@@ -338,6 +356,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		disableQuipsForServerStmt:               q.disableQuipsForServerStmt,
 		enableQuipsForServerStmt:                q.enableQuipsForServerStmt,
 		getAccountStmt:                          q.getAccountStmt,
+		getExpectedPreviousWeekGamesStmt:        q.getExpectedPreviousWeekGamesStmt,
+		getExpectedWeekGamesStmt:                q.getExpectedWeekGamesStmt,
 		getNicknameStmt:                         q.getNicknameStmt,
 		getNicknamesByDiscordIdStmt:             q.getNicknamesByDiscordIdStmt,
 		getQuipByScoreStmt:                      q.getQuipByScoreStmt,

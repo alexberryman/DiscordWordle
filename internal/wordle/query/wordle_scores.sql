@@ -41,6 +41,7 @@ with max_game_week as (select max(game_id / 7) game_week
 )
 select n.nickname,
        json_agg(guesses order by s.game_id)             guesses_per_game,
+       json_agg(json_build_object(game_id, guesses) order by s.game_id) game_guesses,
        json_agg((7 - s.guesses) ^ 2 order by s.game_id) points_per_game,
        count(distinct game_id)                          games_count,
        sum((7 - s.guesses) ^ 2)                         total
@@ -59,6 +60,7 @@ with max_game_week as (select (max(game_id / 7)) - 1 game_week
 )
 select n.nickname,
        json_agg(guesses order by s.game_id)             guesses_per_game,
+       json_agg(json_build_object(game_id, guesses) order by s.game_id) game_guesses,
        json_agg((7 - s.guesses) ^ 2 order by s.game_id) points_per_game,
        count(distinct game_id)                          games_count,
        sum((7 - s.guesses) ^ 2)                         total
@@ -68,3 +70,29 @@ from wordle_scores s
 where n.server_id = $1
 group by n.nickname
 order by sum((7 - s.guesses) ^ 2) desc;
+
+-- name: GetExpectedWeekGames :many
+with max_game_week as (select max(game_id / 7) game_week
+                       from wordle_scores
+                                inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                       where n2.server_id = $1
+),
+     current_week_games as (select distinct game_id
+                            from wordle_scores
+                                     inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                                     inner join max_game_week on game_week = game_id / 7
+                            where n2.server_id = $1)
+select * from current_week_games;
+
+-- name: GetExpectedPreviousWeekGames :many
+with max_game_week as (select max(game_id / 7) -1 game_week
+                       from wordle_scores
+                                inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                       where n2.server_id = $1
+),
+     current_week_games as (select distinct game_id
+                            from wordle_scores
+                                     inner join nicknames n2 on wordle_scores.discord_id = n2.discord_id
+                                     inner join max_game_week on game_week = game_id / 7
+                            where n2.server_id = $1)
+select * from current_week_games;
