@@ -52,6 +52,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteNicknameStmt, err = db.PrepareContext(ctx, deleteNickname); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteNickname: %w", err)
 	}
+	if q.deleteQuipByIdAndServerIdStmt, err = db.PrepareContext(ctx, deleteQuipByIdAndServerId); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteQuipByIdAndServerId: %w", err)
+	}
 	if q.deleteScoresForUserStmt, err = db.PrepareContext(ctx, deleteScoresForUser); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteScoresForUser: %w", err)
 	}
@@ -168,6 +171,11 @@ func (q *Queries) Close() error {
 	if q.deleteNicknameStmt != nil {
 		if cerr := q.deleteNicknameStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing deleteNicknameStmt: %w", cerr)
+		}
+	}
+	if q.deleteQuipByIdAndServerIdStmt != nil {
+		if cerr := q.deleteQuipByIdAndServerIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteQuipByIdAndServerIdStmt: %w", cerr)
 		}
 	}
 	if q.deleteScoresForUserStmt != nil {
@@ -324,6 +332,7 @@ type Queries struct {
 	createScoreStmt                         *sql.Stmt
 	deleteAccountStmt                       *sql.Stmt
 	deleteNicknameStmt                      *sql.Stmt
+	deleteQuipByIdAndServerIdStmt           *sql.Stmt
 	deleteScoresForUserStmt                 *sql.Stmt
 	disableQuipsForServerStmt               *sql.Stmt
 	enableQuipsForServerStmt                *sql.Stmt
@@ -361,6 +370,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		createScoreStmt:                         q.createScoreStmt,
 		deleteAccountStmt:                       q.deleteAccountStmt,
 		deleteNicknameStmt:                      q.deleteNicknameStmt,
+		deleteQuipByIdAndServerIdStmt:           q.deleteQuipByIdAndServerIdStmt,
 		deleteScoresForUserStmt:                 q.deleteScoresForUserStmt,
 		disableQuipsForServerStmt:               q.disableQuipsForServerStmt,
 		enableQuipsForServerStmt:                q.enableQuipsForServerStmt,

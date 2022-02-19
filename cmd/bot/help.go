@@ -13,6 +13,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		"`%s` - Turn off quip responses, the bot will continue to add emojis to the request if it understood the input\n"+
 		"`%s` - Turn quip responses back on if previously disabled\n"+
 		"`%s` - See a list of quips and IDs that can be referenced to delete them\n"+
+		"`%s` - Delete a quip with a given ID\n"+
 		"`%s` - Add your own sass for the bot to use as a reply for a specific number\n"+
 		"`%s` - view the scoreboard of you and your friends\n"+
 		"`%s` - view last week's (game number/7) scoreboard\n"+
@@ -24,6 +25,7 @@ func helpResponse(s *discordgo.Session, m *discordgo.MessageCreate, botMentionTo
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdQuip, cmdQuipDisable),
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdQuip, cmdQuipEnable),
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdQuip, cmdQuipList),
+		fmt.Sprintf("%s %s %s <quip_id>", botMentionToken, cmdQuip, cmdQuipDelete),
 		fmt.Sprintf("%s %s 3 Wow, you seem really smart!", botMentionToken, cmdQuip),
 		fmt.Sprintf("%s %s", botMentionToken, cmdScoreboard),
 		fmt.Sprintf("%s %s %s", botMentionToken, cmdScoreboard, cmdPreviousWeek),

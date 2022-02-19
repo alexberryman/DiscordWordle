@@ -44,6 +44,23 @@ func (q *Queries) CreateQuipForScore(ctx context.Context, arg CreateQuipForScore
 	return i, err
 }
 
+const deleteQuipByIdAndServerId = `-- name: DeleteQuipByIdAndServerId :exec
+delete
+from quips
+where id = $1
+  and inside_joke_server_id = $2
+`
+
+type DeleteQuipByIdAndServerIdParams struct {
+	ID                 int64          `json:"id"`
+	InsideJokeServerID sql.NullString `json:"inside_joke_server_id"`
+}
+
+func (q *Queries) DeleteQuipByIdAndServerId(ctx context.Context, arg DeleteQuipByIdAndServerIdParams) error {
+	_, err := q.exec(ctx, q.deleteQuipByIdAndServerIdStmt, deleteQuipByIdAndServerId, arg.ID, arg.InsideJokeServerID)
+	return err
+}
+
 const getQuipByScore = `-- name: GetQuipByScore :one
 SELECT id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at, uses
 FROM quips

@@ -18,6 +18,7 @@ type Querier interface {
 	CreateScore(ctx context.Context, arg CreateScoreParams) (WordleScore, error)
 	DeleteAccount(ctx context.Context, discordID string) error
 	DeleteNickname(ctx context.Context, discordID string) error
+	DeleteQuipByIdAndServerId(ctx context.Context, arg DeleteQuipByIdAndServerIdParams) error
 	DeleteScoresForUser(ctx context.Context, discordID string) error
 	DisableQuipsForServer(ctx context.Context, serverID string) error
 	EnableQuipsForServer(ctx context.Context, serverID string) error

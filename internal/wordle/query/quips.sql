@@ -25,3 +25,9 @@ WHERE id = $1;
 select *
 from quips
 where inside_joke_server_id = $1;
+
+-- name: DeleteQuipByIdAndServerId :exec
+delete
+from quips
+where id = $1
+  and inside_joke_server_id = $2;
