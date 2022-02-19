@@ -37,6 +37,8 @@ const cmdPreviousWeek = "previous"
 const cmdQuip = "quip"
 const cmdQuipEnable = "enable"
 const cmdQuipDisable = "disable"
+const cmdQuipList = "list"
+const cmdQuipDelete = "delete"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 const noSolutionResult = "X"
@@ -172,12 +174,22 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 		enableQuips(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipDisable) {
 		disableQuips(ctx, m, s)
+	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipList) {
+		listQuips(ctx, m, s)
+	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipDelete) {
+		quipId, err := extractQuipId(input)
+		if err != nil {
+			log.Error().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdQuip).Err(err).Msg("Error parsing quipId for deletion")
+		} else {
+			deleteQuip(ctx, m, s, quipId)
+		}
 	} else if strings.HasPrefix(input, cmdQuip) {
 		score, quip, err := extractScoreQuip(input)
 		if err != nil {
 			log.Error().Str("server_id", m.GuildID).Str("input", input).Str("author", m.Author.ID).Str("command", cmdQuip).Err(err).Msg("Error parsing quip")
+		} else {
+			persistQuip(ctx, m, s, account, score, quip)
 		}
-		persistQuip(ctx, m, s, account, score, quip)
 	} else if strings.HasPrefix(input, cmdScoreboard+" "+cmdPreviousWeek) {
 		getPreviousScoreboard(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdScoreboard) {
@@ -204,6 +216,18 @@ func extractScoreQuip(input string) (int, string, error) {
 
 	score, _ := strconv.Atoi(result["score"])
 	return score, result["quip"], nil
+}
+
+func extractQuipId(input string) (int, error) {
+	var dataExp = regexp.MustCompile(`(?P<quipId>\d+)`)
+
+	result, err := matchGroupsToStringMap(input, dataExp)
+	if err != nil {
+		return 0, err
+	}
+
+	quipId, _ := strconv.Atoi(result["quipId"])
+	return quipId, nil
 }
 
 func extractGameGuesses(input string) (int, int, error) {

@@ -76,6 +76,48 @@ func disableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func listQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	quips, _ := q.GetQuipsByServerId(ctx, sql.NullString{String: m.GuildID, Valid: true})
+
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
+	_, _ = fmt.Fprintln(w, "ID\tGuesses\tQuip\t")
+
+	for _, v := range quips {
+		_, _ = fmt.Fprintln(w, fmt.Sprintf("%d\t%d\t%s\t", v.ID, v.ScoreValue, v.Quip))
+	}
+	_ = w.Flush()
+
+	response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
+func deleteQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, quipId int) {
+	var response response
+
+	q := wordle.New(db)
+	p := wordle.DeleteQuipByIdAndServerIdParams{
+		ID:                 int64(quipId),
+		InsideJokeServerID: sql.NullString{String: m.GuildID, Valid: true},
+	}
+	err := q.DeleteQuipByIdAndServerId(ctx, p)
+
+	if err != nil {
+		log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to delete quip")
+		response.Emoji = "⁉️"
+		response.Text = "Failed to delete quip"
+		flushEmojiAndResponseToDiscord(s, m, response)
+		return
+	}
+
+	response.Emoji = "✌️"
+	response.Text = "Quip has been deleted"
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, quip string) {
 	var nicknames []wordle.Nickname
 	if m.GuildID == "" {
@@ -102,9 +144,9 @@ func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.S
 		q := wordle.New(db)
 		_, err := q.CreateQuipForScore(ctx, quipParams)
 		if err != nil {
-			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to create quipe")
+			log.Error().Err(err).Str("server_id", m.GuildID).Str("content", m.Content).Str("author", m.Author.ID).Msg("Failed to create quip")
 			response.Emoji = "⁉️"
-			response.Text = "Them words area not right"
+			response.Text = "Them words are not right"
 			flushEmojiAndResponseToDiscord(s, m, response)
 			return
 		}

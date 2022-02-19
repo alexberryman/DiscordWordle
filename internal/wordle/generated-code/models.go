@@ -33,6 +33,11 @@ type Quip struct {
 	Uses               int32          `json:"uses"`
 }
 
+type ServerWeekOffset struct {
+	ServerID   string `json:"server_id"`
+	WeekOffset int32  `json:"week_offset"`
+}
+
 type WordleScore struct {
 	ID        int64     `json:"id"`
 	DiscordID string    `json:"discord_id"`
