@@ -82,6 +82,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getQuipsByCreatedByAccountStmt, err = db.PrepareContext(ctx, getQuipsByCreatedByAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetQuipsByCreatedByAccount: %w", err)
 	}
+	if q.getQuipsByServerIdStmt, err = db.PrepareContext(ctx, getQuipsByServerId); err != nil {
+		return nil, fmt.Errorf("error preparing query GetQuipsByServerId: %w", err)
+	}
 	if q.getScoreHistoryByAccountStmt, err = db.PrepareContext(ctx, getScoreHistoryByAccount); err != nil {
 		return nil, fmt.Errorf("error preparing query GetScoreHistoryByAccount: %w", err)
 	}
@@ -217,6 +220,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getQuipsByCreatedByAccountStmt: %w", cerr)
 		}
 	}
+	if q.getQuipsByServerIdStmt != nil {
+		if cerr := q.getQuipsByServerIdStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getQuipsByServerIdStmt: %w", cerr)
+		}
+	}
 	if q.getScoreHistoryByAccountStmt != nil {
 		if cerr := q.getScoreHistoryByAccountStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getScoreHistoryByAccountStmt: %w", cerr)
@@ -326,6 +334,7 @@ type Queries struct {
 	getNicknamesByDiscordIdStmt             *sql.Stmt
 	getQuipByScoreStmt                      *sql.Stmt
 	getQuipsByCreatedByAccountStmt          *sql.Stmt
+	getQuipsByServerIdStmt                  *sql.Stmt
 	getScoreHistoryByAccountStmt            *sql.Stmt
 	getScoresByServerIdStmt                 *sql.Stmt
 	getScoresByServerIdPreviousWeekStmt     *sql.Stmt
@@ -362,6 +371,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getNicknamesByDiscordIdStmt:             q.getNicknamesByDiscordIdStmt,
 		getQuipByScoreStmt:                      q.getQuipByScoreStmt,
 		getQuipsByCreatedByAccountStmt:          q.getQuipsByCreatedByAccountStmt,
+		getQuipsByServerIdStmt:                  q.getQuipsByServerIdStmt,
 		getScoreHistoryByAccountStmt:            q.getScoreHistoryByAccountStmt,
 		getScoresByServerIdStmt:                 q.getScoresByServerIdStmt,
 		getScoresByServerIdPreviousWeekStmt:     q.getScoresByServerIdPreviousWeekStmt,

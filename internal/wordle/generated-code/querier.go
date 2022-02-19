@@ -4,6 +4,7 @@ package wordle
 
 import (
 	"context"
+	"database/sql"
 )
 
 type Querier interface {
@@ -27,6 +28,7 @@ type Querier interface {
 	GetNicknamesByDiscordId(ctx context.Context, discordID string) ([]Nickname, error)
 	GetQuipByScore(ctx context.Context, arg GetQuipByScoreParams) (Quip, error)
 	GetQuipsByCreatedByAccount(ctx context.Context, createdByAccount string) ([]Quip, error)
+	GetQuipsByServerId(ctx context.Context, insideJokeServerID sql.NullString) ([]Quip, error)
 	GetScoreHistoryByAccount(ctx context.Context, arg GetScoreHistoryByAccountParams) ([]GetScoreHistoryByAccountRow, error)
 	GetScoresByServerId(ctx context.Context, serverID string) ([]GetScoresByServerIdRow, error)
 	GetScoresByServerIdPreviousWeek(ctx context.Context, serverID string) ([]GetScoresByServerIdPreviousWeekRow, error)

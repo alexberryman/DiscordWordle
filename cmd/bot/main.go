@@ -37,6 +37,7 @@ const cmdPreviousWeek = "previous"
 const cmdQuip = "quip"
 const cmdQuipEnable = "enable"
 const cmdQuipDisable = "disable"
+const cmdQuipList = "list"
 const cmdTimeZone = "timezone"
 const cmdWordle = "Wordle"
 const noSolutionResult = "X"
@@ -172,6 +173,8 @@ func routeMessageToAction(ctx context.Context, s *discordgo.Session, m *discordg
 		enableQuips(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipDisable) {
 		disableQuips(ctx, m, s)
+	} else if strings.HasPrefix(input, cmdQuip+" "+cmdQuipList) {
+		listQuips(ctx, m, s)
 	} else if strings.HasPrefix(input, cmdQuip) {
 		score, quip, err := extractScoreQuip(input)
 		if err != nil {

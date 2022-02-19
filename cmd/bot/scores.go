@@ -76,6 +76,25 @@ func disableQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.
 	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
+func listQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session) {
+	var response response
+
+	q := wordle.New(db)
+	quips, _ := q.GetQuipsByServerId(ctx, sql.NullString{String: m.GuildID, Valid: true})
+
+	var buf bytes.Buffer
+	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
+	_, _ = fmt.Fprintln(w, "ID\tGuesses\tQuip\t")
+
+	for _, v := range quips {
+		_, _ = fmt.Fprintln(w, fmt.Sprintf("%d\t%d\t%s\t", v.ID, v.ScoreValue, v.Quip))
+	}
+	_ = w.Flush()
+
+	response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
+	flushEmojiAndResponseToDiscord(s, m, response)
+}
+
 func persistQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, account wordle.Account, score int, quip string) {
 	var nicknames []wordle.Nickname
 	if m.GuildID == "" {
