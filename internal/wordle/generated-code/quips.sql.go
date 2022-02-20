@@ -133,6 +133,7 @@ const getQuipsByServerId = `-- name: GetQuipsByServerId :many
 select id, score_value, quip, inside_joke, inside_joke_server_id, created_by_account, created_at, uses
 from quips
 where inside_joke_server_id = $1
+order by score_value, id
 `
 
 func (q *Queries) GetQuipsByServerId(ctx context.Context, insideJokeServerID sql.NullString) ([]Quip, error) {
