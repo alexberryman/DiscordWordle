@@ -82,17 +82,28 @@ func listQuips(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Ses
 	q := wordle.New(db)
 	quips, _ := q.GetQuipsByServerId(ctx, sql.NullString{String: m.GuildID, Valid: true})
 
-	var buf bytes.Buffer
-	w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
-	_, _ = fmt.Fprintln(w, "ID\tGuesses\tQuip\t")
+	for len(quips) > 0 {
+		var buf bytes.Buffer
+		var responseSize int
+		responseSize = 0
 
-	for _, v := range quips {
-		_, _ = fmt.Fprintln(w, fmt.Sprintf("%d\t%d\t%s\t", v.ID, v.ScoreValue, v.Quip))
+		w := tabwriter.NewWriter(&buf, 0, 0, 3, ' ', 0)
+		_, _ = fmt.Fprintln(w, "ID\tGuesses\tQuip\t")
+
+		for _, v := range quips {
+			quipLine := fmt.Sprintf("%d\t%d\t%s\t", v.ID, v.ScoreValue, v.Quip)
+			responseSize = responseSize + len(quipLine)
+			if responseSize > 500 {
+				break
+			}
+			_, _ = fmt.Fprintln(w, quipLine)
+			quips = quips[1:]
+		}
+		_ = w.Flush()
+
+		response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
+		flushEmojiAndResponseToDiscord(s, m, response)
 	}
-	_ = w.Flush()
-
-	response.Text = fmt.Sprintf("```\n%s\n```", buf.String())
-	flushEmojiAndResponseToDiscord(s, m, response)
 }
 
 func deleteQuip(ctx context.Context, m *discordgo.MessageCreate, s *discordgo.Session, quipId int) {

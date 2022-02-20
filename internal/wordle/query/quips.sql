@@ -24,7 +24,8 @@ WHERE id = $1;
 -- name: GetQuipsByServerId :many
 select *
 from quips
-where inside_joke_server_id = $1;
+where inside_joke_server_id = $1
+order by score_value, id;
 
 -- name: DeleteQuipByIdAndServerId :exec
 delete
