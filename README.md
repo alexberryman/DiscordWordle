@@ -12,14 +12,9 @@ Mention the bot using `@BotName help` to see full list of commands:
 To add a score just mention the bot followed by pasting the output you get from the Wordle `Share` button. The bot will store this score in a database and let you know if it worked.
 
 ## Invite this bot to your Discord Server
-Use this Discord link to invite `Discordle` to your server: https://discord.com/api/oauth2/authorize?client_id=929646986125250601&permissions=84032&scope=bot
+~~Use this Discord link to invite `Discordle` to your server: https://discord.com/api/oauth2/authorize?client_id=929646986125250601&permissions=84032&scope=bot~~
 
-This bot requests the following permissions:
-- Send Messages
-- Embed Links
-- Read Message History
-- Mention Everyone
-- Add Reactions
+This currently doesn't work since the bot has been verified yet and hit it maximum number of server. The alternative is you deploy your own bot for free on Heroku. See: [Deploy Your Own Bot below](https://github.com/alexberryman/DiscordWordle#deploy-your-own-bot)
 
 ## Get Help
 - Ask for help in Discord: [![Join Discord](https://img.shields.io/badge/discord-join-7289DA.svg?logo=discord&longCache=true&style=flat)](https://discord.gg/PcZ74rBsTE)
